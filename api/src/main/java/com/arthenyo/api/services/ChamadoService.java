@@ -1,9 +1,6 @@
 package com.arthenyo.api.services;
 
-import com.arthenyo.api.dtos.AcessoDTO;
 import com.arthenyo.api.dtos.ChamadoDTO;
-import com.arthenyo.api.dtos.UsuarioDTO;
-import com.arthenyo.api.entities.Acesso;
 import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.Usuario;
 import com.arthenyo.api.entities.enums.StatusChamado;
@@ -30,8 +27,8 @@ public class ChamadoService {
         Chamado entity = new Chamado();
         criarChamado(entity,dto);
         entity.setStatusChamado(StatusChamado.ABERTO);
-        entity = chamadoRepository.save(entity);
         entity.setCriacaoChamado(Instant.now());
+        entity = chamadoRepository.save(entity);
         return new ChamadoDTO(entity);
     }
     @Transactional

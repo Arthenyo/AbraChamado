@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 @Entity
@@ -18,6 +19,7 @@ public class Reuniao {
     private Long id;
     private String titulo;
     private String descricao;
+    private LocalDate dataReuniao;
     private String link;
     @OneToMany
     private List<Usuario> Participantes = new ArrayList<>();
