@@ -1,12 +1,8 @@
 package com.arthenyo.api.services;
 
-import com.arthenyo.api.dtos.ChamadoDTO;
 import com.arthenyo.api.dtos.ReuniaoDTO;
-import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.Reuniao;
 import com.arthenyo.api.entities.Usuario;
-import com.arthenyo.api.entities.enums.StatusChamado;
-import com.arthenyo.api.repositories.ChamadoRepository;
 import com.arthenyo.api.repositories.ReuniaoRepository;
 import com.arthenyo.api.repositories.UsuarioRepository;
 import com.arthenyo.api.services.exception.DateBaseException;
@@ -17,8 +13,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
-
 @Service
 public class ReuniaoService {
     @Autowired
@@ -28,7 +22,7 @@ public class ReuniaoService {
 
     public ReuniaoDTO salvarReuniao(ReuniaoDTO dto){
         Reuniao entity = new Reuniao();
-        criarChamado(entity,dto);
+        criarReuniao(entity,dto);
         entity = reuniaoRepository.save(entity);
         return new ReuniaoDTO(entity);
     }
@@ -36,7 +30,7 @@ public class ReuniaoService {
     public ReuniaoDTO atualizarReuniao(Long id, ReuniaoDTO userDTO){
         try {
             Reuniao entity = reuniaoRepository.getReferenceById(id);
-            criarChamado(entity,userDTO);
+            criarReuniao(entity,userDTO);
             entity = reuniaoRepository.save(entity);
             return new ReuniaoDTO(entity);
         }catch (EntityNotFoundException e){
@@ -55,7 +49,7 @@ public class ReuniaoService {
         }
     }
 
-    private void criarChamado(Reuniao entity, ReuniaoDTO dto) {
+    private void criarReuniao(Reuniao entity, ReuniaoDTO dto) {
         entity.setTitulo(dto.getTitulo());
         entity.setDescricao(dto.getDescricao());
         entity.setDataReuniao(dto.getDataReuniao());
