@@ -26,6 +26,14 @@ public class UsuarioService implements UserDetailsService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private AutenticacaoService autenticacaoService;
+
+    @Transactional(readOnly = true)
+    public UsuarioDTO usuarioLogado(){
+        Usuario usuario = autenticacaoService.usuarioAutenticado();
+        return new UsuarioDTO(usuario);
+    }
 
     public UsuarioDTO salvarUsuario(UsuarioDTO dto){
         Usuario entity = new Usuario();
