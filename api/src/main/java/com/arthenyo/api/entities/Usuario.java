@@ -7,9 +7,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+
 @Entity
 @Table(name = "tb_usuario")
 @AllArgsConstructor
@@ -27,6 +26,13 @@ public class Usuario implements UserDetails {
             joinColumns = @JoinColumn(name = "usuario_id"),
             inverseJoinColumns = @JoinColumn(name = "acesso_id"))
     private Set<Acesso> acessos = new HashSet<>();
+    @ManyToMany
+    @JoinTable(
+            name = "usuario_chamado_favorito",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "chamado_id")
+    )
+    private List<Chamado> chamadosFavoritos = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

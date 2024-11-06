@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 
 
 @Entity
@@ -32,4 +33,6 @@ public class Chamado {
     @ManyToOne
     @JoinColumn(name = "atendente_id")
     private Usuario atendente;
+    @ManyToMany(mappedBy = "chamadosFavoritos")
+    private List<Usuario> favoritadoPor;
 }

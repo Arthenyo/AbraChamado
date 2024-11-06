@@ -24,12 +24,14 @@
 body {
   background: var(--bg);
   color: var(--cor-fonte);
+  overflow: hidden;
 }
 
 #content {
   display: grid;
   grid-template: auto / 1fr 4fr;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 ul,
@@ -150,6 +152,7 @@ aside {
   flex-direction: column;
   gap: 32px;
   padding: 24px 0;
+  overflow-y: auto;
 }
 
 aside .logo {
@@ -202,7 +205,6 @@ header,
 .em-alta > div {
   background: var(--bg-card);
   box-shadow: 1px 1px 4px var(--sombra);
-  background: var(--bg-card);
   border-radius: 4px;
 }
 
@@ -211,6 +213,7 @@ main {
   padding: 16px;
   grid-template: auto auto / 3fr 1fr;
   gap: 24px;
+  overflow-y: auto;
 }
 
 section {
@@ -237,14 +240,13 @@ section h2 {
 .chamados .card {
   display: grid;
   grid-template-columns: 6px 1fr;
+  border-radius: 4px;
+  box-shadow: 1px 1px 4px var(--sombra);
+  background: var(--bg-card);
 }
 
 .chamados .card .barra {
-  background: linear-gradient(
-    135deg,
-    var(--cor-primaria),
-    var(--cor-secundaria-2)
-  );
+  background: linear-gradient(135deg, var(--cor-primaria), var(--cor-secundaria-2));
   border-radius: 4px 0 0 4px;
 }
 
@@ -281,7 +283,7 @@ section h2 {
   padding: 8px;
 }
 
-.card .acoes button:hover {
+.chamados .card .acoes button:hover {
   color: var(--cor-secundaria-1);
 }
 
@@ -297,4 +299,135 @@ footer div {
   display: flex;
   justify-content: center;
   gap: 8px;
+}
+
+.scrollable-chamados {
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-primaria) var(--bg-card);
+  max-height: 350px;
+  overflow-y: auto;
+}
+
+.scrollable-chamados::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollable-chamados::-webkit-scrollbar-track {
+  background: var(--bg-card);
+  border-radius: 4px;
+}
+
+.scrollable-chamados::-webkit-scrollbar-thumb {
+  background-color: var(--cor-primaria);
+  border-radius: 4px;
+  border: 2px solid var(--bg-card);
+}
+
+.impacto {
+  margin-bottom: 24px;
+}
+
+.cards-impacto {
+  display: flex;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+.card-impacto {
+  background: var(--bg-card);
+  box-shadow: 1px 1px 4px var(--sombra);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  width: 200px;
+}
+
+.card-impacto h3 {
+  font-size: 1.2em;
+  margin-bottom: 10px;
+}
+
+.card-impacto p {
+  font-size: 2em;
+  font-weight: bold;
+  color: var(--cor-primaria);
+}
+
+/* CSS para o Quadro de Avisos */
+.quadro-avisos {
+  background: var(--bg-card);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 1px 1px 4px var(--sombra);
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quadro-avisos h2 {
+  font-size: 1.4em;
+  margin-bottom: 10px;
+  color: var(--cor-primaria);
+}
+
+.quadro-avisos p {
+  margin-bottom: 10px;
+  color: var(--cor-fonte);
+}
+
+.quadro-avisos ul {
+  list-style: none;
+  padding-left: 0;
+  color: var(--cor-fonte-fraca);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quadro-avisos ul li {
+  margin: 0;
+}
+
+/* Modal CSS for better message display */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-card);
+  color: var(--cor-fonte);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  width: 80%;
+  max-width: 500px;
+  z-index: 1000;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--cor-secundaria-2);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.modal-content {
+  font-size: 1em;
+  margin-bottom: 20px;
+}
+
+.modal-footer {
+  text-align: right;
+}
+
+.modal-footer button {
+  margin-left: 10px;
 }

@@ -15,6 +15,7 @@ public class Anotacoes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String anotacao;
+    private boolean fixo;
     @ManyToOne
     @JoinColumn(name = "autor_id")
     private Usuario autor;

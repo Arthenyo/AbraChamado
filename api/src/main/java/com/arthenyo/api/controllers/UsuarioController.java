@@ -1,6 +1,8 @@
 package com.arthenyo.api.controllers;
 
+import com.arthenyo.api.dtos.ChamadoDTO;
 import com.arthenyo.api.dtos.UsuarioDTO;
+import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.services.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/usuario")
@@ -22,7 +25,16 @@ public class UsuarioController {
     public ResponseEntity<UsuarioDTO>usuarioLogado(){
         return ResponseEntity.status(HttpStatus.OK).body(usuarioService.usuarioLogado());
     }
-
+    @PostMapping("/{usuarioId}/favoritar/{chamadoId}")
+    public ResponseEntity<Void> favoritarChamado(@PathVariable Long usuarioId, @PathVariable Long chamadoId) {
+        usuarioService.favoritarOuDesfavoritarChamado(usuarioId, chamadoId);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/{usuarioId}/favoritos")
+    public ResponseEntity<List<ChamadoDTO>> getChamadosFavoritos(@PathVariable Long usuarioId) {
+        List<ChamadoDTO> favoritos = usuarioService.getChamadosFavoritos(usuarioId);
+        return ResponseEntity.ok(favoritos);
+    }
     @PostMapping
     public ResponseEntity<UsuarioDTO> salvarUsuario(@RequestBody UsuarioDTO dto){
         dto = usuarioService.salvarUsuario(dto);

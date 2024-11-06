@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChamadoService {
@@ -22,6 +24,22 @@ public class ChamadoService {
     private ChamadoRepository chamadoRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    public long getTotalChamados() {
+        return chamadoRepository.countTotalChamados();
+    }
+
+    public long getTotalChamadosAbertos() {
+        return chamadoRepository.countByStatusChamado(StatusChamado.ABERTO);
+    }
+
+    public long getTotalChamadosFinalizados() {
+        return chamadoRepository.countByStatusChamado(StatusChamado.FECHADO);
+    }
+    public List<ChamadoDTO> getTop5ChamadosAbertos() {
+        List<Chamado> chamados = chamadoRepository.findTop5ChamadosAbertos();
+        return chamados.stream().map(ChamadoDTO::new).collect(Collectors.toList());
+    }
 
     public ChamadoDTO salvarChamado(ChamadoDTO dto){
         Chamado entity = new Chamado();

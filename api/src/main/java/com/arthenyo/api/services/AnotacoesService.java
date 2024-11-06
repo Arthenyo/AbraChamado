@@ -16,6 +16,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class AnotacoesService {
     @Autowired
@@ -23,6 +26,10 @@ public class AnotacoesService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    public List<AnotacoesDTO> buscarUltimas5Anotacoes() {
+        List<Anotacoes> anotacoes = anotacoesRepository.findTop5Anotacoes();
+        return anotacoes.stream().map(AnotacoesDTO::new).collect(Collectors.toList());
+    }
     public AnotacoesDTO salvarAnotacoes(AnotacoesDTO dto){
         Anotacoes entity = new Anotacoes();
         criarAnotacoes(entity,dto);

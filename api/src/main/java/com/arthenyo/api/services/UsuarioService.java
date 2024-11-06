@@ -1,10 +1,13 @@
 package com.arthenyo.api.services;
 
 import com.arthenyo.api.dtos.AcessoDTO;
+import com.arthenyo.api.dtos.ChamadoDTO;
 import com.arthenyo.api.dtos.UsuarioDTO;
 import com.arthenyo.api.entities.Acesso;
+import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.Usuario;
 import com.arthenyo.api.projections.UsuarioDetalhesProjection;
+import com.arthenyo.api.repositories.ChamadoRepository;
 import com.arthenyo.api.repositories.UsuarioRepository;
 import com.arthenyo.api.services.exception.DateBaseException;
 import com.arthenyo.api.services.exception.ObjectNotFound;
@@ -18,7 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UsuarioService implements UserDetailsService {
@@ -28,11 +33,35 @@ public class UsuarioService implements UserDetailsService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private AutenticacaoService autenticacaoService;
+    @Autowired
+    private ChamadoRepository chamadoRepository;
 
     @Transactional(readOnly = true)
     public UsuarioDTO usuarioLogado(){
         Usuario usuario = autenticacaoService.usuarioAutenticado();
         return new UsuarioDTO(usuario);
+    }
+    public void favoritarOuDesfavoritarChamado(Long usuarioId, Long chamadoId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ObjectNotFound("Usuário não encontrado"));
+        Chamado chamado = chamadoRepository.findById(chamadoId)
+                .orElseThrow(() -> new ObjectNotFound("Chamado não encontrado"));
+
+        if (usuario.getChamadosFavoritos().contains(chamado)) {
+            usuario.getChamadosFavoritos().remove(chamado);
+        } else {
+            usuario.getChamadosFavoritos().add(chamado);
+        }
+
+        usuarioRepository.save(usuario);
+    }
+    public List<ChamadoDTO> getChamadosFavoritos(Long usuarioId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new ObjectNotFound("Usuário não encontrado"));
+
+        return usuario.getChamadosFavoritos().stream()
+                .map(ChamadoDTO::new)
+                .collect(Collectors.toList());
     }
 
     public UsuarioDTO salvarUsuario(UsuarioDTO dto){

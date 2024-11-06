@@ -6,16 +6,23 @@ public class AnotacoesDTO {
     private Long id;
     private String anotacao;
     private String autor;
+    private boolean fixo; // Novo campo para indicar se a anotação é fixada
 
-    public AnotacoesDTO(Long id, String anotacao, String autor) {
+    public AnotacoesDTO() {
+    }
+
+    public AnotacoesDTO(Long id, String anotacao, String autor, boolean fixo) {
         this.id = id;
         this.anotacao = anotacao;
         this.autor = autor;
+        this.fixo = fixo;
     }
+
     public AnotacoesDTO(Anotacoes entity) {
-        id = entity.getId();
-        anotacao = entity.getAnotacao();
-        autor = entity.getAutor().getNome();
+        this.id = entity.getId();
+        this.anotacao = entity.getAnotacao();
+        this.autor = entity.getAutor().getNome();
+        this.fixo = entity.isFixo();
     }
 
     public Long getId() {
@@ -28,5 +35,9 @@ public class AnotacoesDTO {
 
     public String getAutor() {
         return autor;
+    }
+
+    public boolean isFixo() {
+        return fixo;
     }
 }
