@@ -69,6 +69,16 @@ class AuthService {
       throw error;
     }
   }
+
+  logout() {
+    // Remove o token e as informações do usuário do armazenamento local
+    localStorage.removeItem("user");
+
+    // Opcional: faça uma chamada ao servidor para invalidar o token, se necessário
+    console.log("Usuário deslogado");
+
+    // Redireciona para a página de login ou realiza outras ações necessárias
+  }
 }
 
 const authServiceInstance = new AuthService();

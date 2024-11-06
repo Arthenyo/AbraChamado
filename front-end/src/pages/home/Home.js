@@ -84,6 +84,12 @@ export function Home() {
     fetchUltimasAnotacoes();
   }, []);
 
+  const handleLogout = () => {
+    authServiceInstance.logout();
+    // Redirecionar para a página de login após o logout
+    window.location.href = "/";
+  };
+
   const renderAvisos = () => {
     if (avisos.length === 0) {
       return <p>Nenhum aviso disponível no momento.</p>;
@@ -170,6 +176,13 @@ export function Home() {
             </form>
             <div className="perfil">
               <p>{userName}</p>
+              <button
+                onClick={handleLogout}
+                className="logout-button"
+                title="Sair"
+              >
+                Sair
+              </button>
             </div>
           </div>
           <div className="saudacao">
