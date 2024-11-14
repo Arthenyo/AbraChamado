@@ -1,0 +1,149 @@
+.container-dashboard-atendentes {
+    display: grid;
+    width: 96%;
+    margin: 0 auto;
+    gap: 1.8rem;
+    grid-template-columns: 14rem auto;
+  }
+  
+  .atendentes-main {
+    margin-top: 1.4rem;
+    background: var(--color-white);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    box-shadow: var(--box-shadow);
+  }
+  
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+  
+  .search-bar {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .search-bar input[type='text'] {
+    padding: 0.5rem;
+    border: 1px solid var(--color-info-light);
+    border-radius: var(--border-radius-1);
+    outline: none;
+  }
+  
+  .search-bar button {
+    padding: 0.5rem 1rem;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    border-radius: var(--border-radius-1);
+    cursor: pointer;
+    transition: background 300ms ease;
+  }
+  
+  .search-bar button:hover {
+    background: var(--color-primary-variant);
+  }
+  
+  .top-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .profile .info p {
+    font-size: 1rem;
+  }
+  
+  .atendentes-main h1 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .atendentes-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+  }
+  
+  .atendentes-table thead th {
+    background: var(--color-light);
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-info-light);
+  }
+  
+  .atendentes-table tbody td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--color-light);
+  }
+  
+  .atendentes-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+  
+  .atendentes-table tbody tr:hover {
+    background: var(--color-light);
+  }
+  
+  .details-btn {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 0.3rem 0.6rem;
+    border: none;
+    border-radius: var(--border-radius-1);
+    cursor: pointer;
+    transition: background 300ms ease;
+  }
+  
+  .details-btn:hover {
+    background: var(--color-primary-variant);
+  }
+  
+  .status-ativo {
+    color: var(--color-success);
+    font-weight: bold;
+  }
+  
+  .status-inativo {
+    color: var(--color-danger);
+    font-weight: bold;
+  }
+  
+  .pagination {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .pagination-btn {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--border-radius-1);
+    cursor: pointer;
+    transition: background 300ms ease;
+  }
+  
+  .pagination-btn:disabled {
+    background: var(--color-info-dark);
+    cursor: not-allowed;
+  }
+  
+  .pagination-btn:hover:not(:disabled) {
+    background: var(--color-primary-variant);
+  }
+  
+  .pagination-info {
+    font-weight: bold;
+    color: var(--color-dark);
+  }

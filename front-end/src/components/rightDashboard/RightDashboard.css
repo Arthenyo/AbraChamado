@@ -1,0 +1,31 @@
+.right-dashboard {
+  width: 100%;
+  padding: var(--padding);
+}
+
+.right-dashboard .top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.theme-toggler {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.theme-toggler span {
+  cursor: pointer;
+  color: var(--color-info-dark);
+}
+
+.right-dashboard .profile {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.right-dashboard .profile .info p {
+  font-size: 1rem;
+}

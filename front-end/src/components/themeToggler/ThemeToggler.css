@@ -1,0 +1,30 @@
+.theme-toggler {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+}
+
+.theme-toggler span {
+  color: var(--color-info-dark);
+}
+
+/* Global Styles for Dark Mode */
+body.dark-mode {
+  --color-background: #1e1e2f;
+  --color-white: #2e2e3f;
+  --color-dark: #f5f5f5;
+  --color-info-dark: #a0a0b0;
+  --color-light: rgba(255, 255, 255, 0.1);
+  background: var(--color-background);
+  color: var(--color-dark);
+}
+
+body.dark-mode a {
+  color: var(--color-dark);
+}
+
+body.dark-mode .card {
+  background: var(--color-white);
+  color: var(--color-dark);
+}
