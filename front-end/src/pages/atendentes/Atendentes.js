@@ -1,38 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
+import serviceHome from '../../Servicies/service';
+import authService from '../../Servicies/authService'; // Importar o authService para obter dados do usuário logado
 import './Atendentes.css';
 
 const Atendentes = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0); // Pageable começa em 0
   const atendentesPerPage = 5;
+  const [atendentes, setAtendentes] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
 
-  // Dummy data for atendentes
-  const atendentes = Array.from({ length: 25 }, (_, index) => ({
-    id: index + 1,
-    name: `Atendente ${index + 1}`,
-    email: `atendente${index + 1}@exemplo.com`,
-    phone: `(11) 9${index + 1}000-0000`,
-    setor: ['Financeiro', 'TI', 'RH'][index % 3],
-    status: ['Ativo', 'Inativo'][index % 2],
-  }));
+  useEffect(() => {
+    fetchAtendentes(currentPage, atendentesPerPage);
 
-  const totalPages = Math.ceil(atendentes.length / atendentesPerPage);
-  const currentAtendentes = atendentes.slice(
-    (currentPage - 1) * atendentesPerPage,
-    currentPage * atendentesPerPage
-  );
+    // Chama o serviço para obter o usuário logado
+    const fetchLoggedUser = async () => {
+      try {
+        const user = await authService.getLoggedUser();
+        setUserName(user.nome || 'Usuário'); // Usar 'Usuário' como fallback caso o nome não exista
+        setUserRole(user.tipoUsuario || 'Acesso não definido'); // Pegar o tipo de usuário
+      } catch (error) {
+        console.error('Erro ao obter o usuário logado', error);
+      }
+    };
+
+    fetchLoggedUser();
+  }, [currentPage]);
+
+  // Função para buscar atendentes do backend
+  const fetchAtendentes = async (page, size) => {
+    try {
+      const response = await serviceHome.obterUsuariosPorTipo('ATENDENTE', page, size);
+      setAtendentes(response.content);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error("Erro ao buscar atendentes", error);
+    }
+  };
 
   const handlePageChange = (direction) => {
-    if (direction === 'prev' && currentPage > 1) {
+    if (direction === 'prev' && currentPage > 0) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === 'next' && currentPage < totalPages) {
+    } else if (direction === 'next' && currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
-  const handleCreateCliente = () => {
+
+  const handleEditAtendente = (atendente) => {
+    navigate(`/atendentes/${atendente.id}/editar`, { state: { atendente } });
+  };
+
+  const handleCreateAtendente = () => {
     navigate('/atendentes/novo');
   };
 
@@ -44,13 +67,13 @@ const Atendentes = () => {
           <div className="search-bar">
             <input type="text" placeholder="Pesquisar por atendente..." />
             <button>Pesquisar</button>
-            <button className="create-btn" onClick={handleCreateCliente}>Criar Atendente</button>
+            <button className="create-btn" onClick={handleCreateAtendente}>Criar Atendente</button>
           </div>
           <div className="top-actions">
             <div className="profile">
               <div className="info">
-                <p>Olá, <b>Arthenyo</b></p>
-                <small className="text-muted">Admin</small>
+                <p>Olá, <b>{userName}</b></p>
+                <small className="text-muted">{userRole}</small>
               </div>
             </div>
             <ThemeToggler />
@@ -63,39 +86,41 @@ const Atendentes = () => {
               <th>ID</th>
               <th>Nome</th>
               <th>Email</th>
-              <th>Telefone</th>
-              <th>Setor</th>
-              <th>Status</th>
+              <th>Tipo de Usuário</th>
               <th>Ação</th>
             </tr>
           </thead>
           <tbody>
-            {currentAtendentes.map((atendente) => (
-              <tr key={atendente.id}>
-                <td>{atendente.id}</td>
-                <td>{atendente.name}</td>
-                <td>{atendente.email}</td>
-                <td>{atendente.phone}</td>
-                <td>{atendente.setor}</td>
-                <td className={`status-${atendente.status.replace(' ', '-').toLowerCase()}`}>{atendente.status}</td>
-                <td><button className="details-btn">Editar</button></td>
+            {atendentes.length > 0 ? (
+              atendentes.map((atendente) => (
+                <tr key={atendente.id}>
+                  <td>{atendente.id}</td>
+                  <td>{atendente.nome}</td>
+                  <td>{atendente.email}</td>
+                  <td>{atendente.tipoUsuario}</td>
+                  <td><button className="details-btn" onClick={() => handleEditAtendente(atendente)}>Editar</button></td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">Nenhum atendente encontrado.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         <div className="pagination">
           <button
             className="pagination-btn"
             onClick={() => handlePageChange('prev')}
-            disabled={currentPage === 1}
+            disabled={currentPage === 0}
           >
             &lt;&lt;
           </button>
-          <span className="pagination-info">{currentPage}</span>
+          <span className="pagination-info">{currentPage + 1} de {totalPages}</span>
           <button
             className="pagination-btn"
             onClick={() => handlePageChange('next')}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages - 1}
           >
             &gt;&gt;
           </button>

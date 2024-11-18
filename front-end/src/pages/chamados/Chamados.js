@@ -1,47 +1,65 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
+import serviceHome from '../../Servicies/service';
+import authService from '../../Servicies/authService';
 import './Chamados.css';
 
 const Chamados = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const chamadosPerPage = 5;
+  const [chamados, setChamados] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
 
-  // Dummy data for chamados
-  const chamados = Array.from({ length: 35 }, (_, index) => ({
-    id: index + 1,
-    subject: `Chamado ${index + 1}`,
-    user: `Usuário ${index + 1}`,
-    priority: ['Baixa', 'Média', 'Alta'][index % 3],
-    sector: ['Financeiro', 'TI', 'RH'][index % 3],
-    attendant: ['João', 'Maria', 'Carlos'][index % 3],
-    status: ['Aberto', 'Em Andamento', 'Resolvido'][index % 3],
-    description: `Descrição detalhada do chamado ${index + 1}.`,
-    history: [
-      { date: '2024-11-01', action: 'Chamado aberto', description: 'Descrição inicial do chamado.' },
-      { date: '2024-11-02', action: 'Chamado em andamento', description: 'Chamado está sendo analisado pela equipe técnica.' },
-      { date: '2024-11-03', action: 'Chamado resolvido', description: 'Problema foi resolvido e o chamado foi fechado.' },
-    ],
-  }));
+  useEffect(() => {
+    // Chama o serviço para obter o usuário logado
+    const fetchLoggedUser = async () => {
+      try {
+        const user = await authService.getLoggedUser();
+        setUserName(user.nome || 'Usuário'); // Usar 'Usuário' como fallback caso o nome não exista
+        setUserRole(user.tipoUsuario || 'Acesso não definido');
+      } catch (error) {
+        console.error('Erro ao obter o usuário logado', error);
+      }
+    };
 
-  const totalPages = Math.ceil(chamados.length / chamadosPerPage);
-  const currentChamados = chamados.slice(
-    (currentPage - 1) * chamadosPerPage,
-    currentPage * chamadosPerPage
-  );
+    fetchLoggedUser();
+  }, []);
+
+  // Função para buscar os chamados paginados
+  useEffect(() => {
+    fetchChamados(currentPage, chamadosPerPage);
+  }, [currentPage]);
+
+  const fetchChamados = async (pagina, tamanho) => {
+    try {
+      const response = await serviceHome.obterTodosChamados(pagina, tamanho);
+      setChamados(response.content);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error('Erro ao buscar chamados', error);
+    }
+  };
 
   const handlePageChange = (direction) => {
-    if (direction === 'prev' && currentPage > 1) {
+    if (direction === 'prev' && currentPage > 0) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === 'next' && currentPage < totalPages) {
+    } else if (direction === 'next' && currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
 
-  const handleViewDetails = (chamado) => {
-    navigate(`/chamados/${chamado.id}`, { state: { chamado } });
+  const handleViewDetails = async (chamadoId) => {
+    try {
+      const chamado = await serviceHome.buscarChamadoPorId(chamadoId);
+      navigate(`/chamados/${chamado.id}`, { state: { chamado } });
+    } catch (error) {
+      console.error('Erro ao buscar detalhes do chamado', error);
+    }
   };
 
   return (
@@ -56,8 +74,8 @@ const Chamados = () => {
           <div className="top-actions">
             <div className="profile">
               <div className="info">
-                <p>Olá, <b>Arthenyo</b></p>
-                <small className="text-muted">Admin</small>
+                <p>Olá, <b>{userName}</b></p>
+                <small className="text-muted">{userRole}</small>
               </div>
             </div>
             <ThemeToggler />
@@ -77,15 +95,15 @@ const Chamados = () => {
             </tr>
           </thead>
           <tbody>
-            {currentChamados.map((chamado) => (
+            {chamados.map((chamado) => (
               <tr key={chamado.id}>
-                <td>{chamado.subject}</td>
-                <td>{chamado.user}</td>
-                <td>{chamado.priority}</td>
-                <td>{chamado.sector}</td>
-                <td>{chamado.attendant}</td>
-                <td className={`status-${chamado.status.replace(' ', '-').toLowerCase()}`}>{chamado.status}</td>
-                <td><button className="details-btn" onClick={() => handleViewDetails(chamado)}>Detalhes</button></td>
+                <td>{chamado.titulo}</td>
+                <td>{chamado.usuario}</td>
+                <td>{chamado.prioridadeChamado}</td>
+                <td>{chamado.setor || 'N/A'}</td>
+                <td>{chamado.atendente || 'N/A'}</td>
+                <td className={`status-${chamado.statusChamado.replace(' ', '-').toLowerCase()}`}>{chamado.statusChamado}</td>
+                <td><button className="details-btn" onClick={() => handleViewDetails(chamado.id)}>Detalhes</button></td>
               </tr>
             ))}
           </tbody>
@@ -94,15 +112,15 @@ const Chamados = () => {
           <button
             className="pagination-btn"
             onClick={() => handlePageChange('prev')}
-            disabled={currentPage === 1}
+            disabled={currentPage === 0}
           >
             &lt;&lt;
           </button>
-          <span className="pagination-info">{currentPage}</span>
+          <span className="pagination-info">{currentPage + 1}</span>
           <button
             className="pagination-btn"
             onClick={() => handlePageChange('next')}
-            disabled={currentPage === totalPages}
+            disabled={currentPage >= totalPages - 1}
           >
             &gt;&gt;
           </button>

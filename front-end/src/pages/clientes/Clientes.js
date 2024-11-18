@@ -1,34 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
+import serviceHome from '../../Servicies/service';
+import authService from '../../Servicies/authService'; // Importar o authService para obter dados do usuário logado
 import './Clientes.css';
 
 const Clientes = () => {
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0); // Pageable começa em 0
   const clientesPerPage = 5;
+  const [clientes, setClientes] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const [userName, setUserName] = useState('');
+  const [userRole, setUserRole] = useState('');
 
-  // Dummy data for clientes
-  const clientes = Array.from({ length: 30 }, (_, index) => ({
-    id: index + 1,
-    name: `Cliente ${index + 1}`,
-    email: `cliente${index + 1}@exemplo.com`,
-    phone: `(11) 9${index + 1}000-0000`,
-    address: `Rua Exemplo ${index + 1}, Cidade ${index % 5 + 1}`,
-    status: ['Ativo', 'Inativo'][index % 2],
-  }));
+  useEffect(() => {
+    fetchClientes(currentPage, clientesPerPage);
 
-  const totalPages = Math.ceil(clientes.length / clientesPerPage);
-  const currentClientes = clientes.slice(
-    (currentPage - 1) * clientesPerPage,
-    currentPage * clientesPerPage
-  );
+    // Chama o serviço para obter o usuário logado
+    const fetchLoggedUser = async () => {
+      try {
+        const user = await authService.getLoggedUser();
+        setUserName(user.nome || 'Usuário'); // Usar 'Usuário' como fallback caso o nome não exista
+        setUserRole(user.tipoUsuario || 'Acesso não definido'); // Pegar o tipo de usuário
+      } catch (error) {
+        console.error('Erro ao obter o usuário logado', error);
+      }
+    };
+
+    fetchLoggedUser();
+  }, [currentPage]);
+
+  // Função para buscar clientes do backend
+  const fetchClientes = async (page, size) => {
+    try {
+      const response = await serviceHome.obterUsuariosPorTipo('CLIENTE', page, size);
+      setClientes(response.content);
+      setTotalPages(response.totalPages);
+    } catch (error) {
+      console.error("Erro ao buscar clientes", error);
+    }
+  };
 
   const handlePageChange = (direction) => {
-    if (direction === 'prev' && currentPage > 1) {
+    if (direction === 'prev' && currentPage > 0) {
       setCurrentPage(currentPage - 1);
-    } else if (direction === 'next' && currentPage < totalPages) {
+    } else if (direction === 'next' && currentPage < totalPages - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
@@ -54,8 +72,8 @@ const Clientes = () => {
           <div className="top-actions">
             <div className="profile">
               <div className="info">
-                <p>Olá, <b>Arthenyo</b></p>
-                <small className="text-muted">Admin</small>
+                <p>Olá, <b>{userName}</b></p>
+                <small className="text-muted">{userRole}</small>
               </div>
             </div>
             <ThemeToggler />
@@ -68,39 +86,41 @@ const Clientes = () => {
               <th>ID</th>
               <th>Nome</th>
               <th>Email</th>
-              <th>Telefone</th>
-              <th>Endereço</th>
-              <th>Status</th>
+              <th>Tipo de Usuário</th>
               <th>Ação</th>
             </tr>
           </thead>
           <tbody>
-            {currentClientes.map((cliente) => (
-              <tr key={cliente.id}>
-                <td>{cliente.id}</td>
-                <td>{cliente.name}</td>
-                <td>{cliente.email}</td>
-                <td>{cliente.phone}</td>
-                <td>{cliente.address}</td>
-                <td className={`status-${cliente.status.replace(' ', '-').toLowerCase()}`}>{cliente.status}</td>
-                <td><button className="edit-btn" onClick={() => handleEditCliente(cliente)}>Editar</button></td>
+            {clientes.length > 0 ? (
+              clientes.map((cliente) => (
+                <tr key={cliente.id}>
+                  <td>{cliente.id}</td>
+                  <td>{cliente.nome}</td>
+                  <td>{cliente.email}</td>
+                  <td>{cliente.tipoUsuario}</td>
+                  <td><button className="edit-btn" onClick={() => handleEditCliente(cliente)}>Editar</button></td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">Nenhum cliente encontrado.</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
         <div className="pagination">
           <button
             className="pagination-btn"
             onClick={() => handlePageChange('prev')}
-            disabled={currentPage === 1}
+            disabled={currentPage === 0}
           >
             &lt;&lt;
           </button>
-          <span className="pagination-info">{currentPage}</span>
+          <span className="pagination-info">{currentPage + 1} de {totalPages}</span>
           <button
             className="pagination-btn"
             onClick={() => handlePageChange('next')}
-            disabled={currentPage === totalPages}
+            disabled={currentPage === totalPages - 1}
           >
             &gt;&gt;
           </button>

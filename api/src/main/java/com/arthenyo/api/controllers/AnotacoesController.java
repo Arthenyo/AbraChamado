@@ -5,6 +5,7 @@ import com.arthenyo.api.services.AnotacoesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -17,12 +18,15 @@ public class AnotacoesController {
 
     @Autowired
     private AnotacoesService anotacoesService;
-    @GetMapping("/ultimas")
-    public ResponseEntity<List<AnotacoesDTO>> buscarUltimas5Anotacoes() {
-        List<AnotacoesDTO> anotacoes = anotacoesService.buscarUltimas5Anotacoes();
+    @GetMapping("/todas")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
+    public ResponseEntity<List<AnotacoesDTO>> buscarTodasAnotacoes() {
+        List<AnotacoesDTO> anotacoes = anotacoesService.buscarTodasAnotacoes();
         return ResponseEntity.ok().body(anotacoes);
     }
+
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
     public ResponseEntity<AnotacoesDTO> salvarAnotacoes(@RequestBody AnotacoesDTO dto){
         dto = anotacoesService.salvarAnotacoes(dto);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}")
@@ -31,12 +35,14 @@ public class AnotacoesController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
     public ResponseEntity<AnotacoesDTO>atualizarAnotacoes(@PathVariable Long id ,@RequestBody AnotacoesDTO dto){
         dto = anotacoesService.atualizarAnotacoes(id,dto);
         return ResponseEntity.ok().body(dto);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
     public ResponseEntity<Void>deletarAnotacoes(@PathVariable Long id){
         anotacoesService.deletarAnotacoes(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

@@ -1,0 +1,69 @@
+/* Login.css */
+.login-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-dark);
+}
+
+.login-form {
+  background: var(--color-white);
+  padding: 2rem;
+  border-radius: var(--border-radius-2);
+  box-shadow: var(--box-shadow);
+  width: 350px;
+  text-align: center;
+}
+
+.login-form h2 {
+  margin-bottom: 1.5rem;
+  color: var(--color-dark);
+}
+
+.input-group {
+  margin-bottom: 1.2rem;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--color-dark-variant);
+  font-weight: bold;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.8rem;
+  border: 1px solid var(--color-info-light);
+  border-radius: var(--border-radius-1);
+  outline: none;
+  transition: border-color 300ms ease;
+}
+
+.input-group input:focus {
+  border-color: var(--color-primary);
+}
+
+.login-btn {
+  padding: 0.8rem 2rem;
+  background: var(--color-primary);
+  color: var(--color-white);
+  border: none;
+  border-radius: var(--border-radius-1);
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: background 300ms ease;
+}
+
+.login-btn:hover {
+  background: var(--color-primary-variant);
+}
+
+.error-message {
+  color: var(--color-danger);
+  margin-bottom: 1rem;
+  font-weight: bold;
+}

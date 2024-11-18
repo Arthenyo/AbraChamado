@@ -1,32 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
 import { useNavigate, useParams } from 'react-router-dom';
+import serviceHome from '../../Servicies/service';
 import './AtendenteForm.css';
 
 const AtendenteForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const isEditMode = Boolean(id);
+
   const [atendente, setAtendente] = useState({
-    name: isEditMode ? `Atendente ${id}` : '',
-    email: isEditMode ? `atendente${id}@exemplo.com` : '',
-    phone: isEditMode ? `(11) 9${id}000-0000` : '',
-    setor: isEditMode ? ['Financeiro', 'TI', 'RH'][id % 3] : '',
-    status: isEditMode ? ['Ativo', 'Inativo'][id % 2] : 'Ativo',
-    password: '',
+    nome: '',
+    email: '',
+    senha: '',
+    tipoUsuario: 'ATENDENTE',
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isEditMode) {
+      // Busca os dados do atendente para edição
+      const fetchAtendente = async () => {
+        try {
+          const response = await serviceHome.buscarChamadoPorId(id);
+          setAtendente({
+            ...response,
+            senha: '', // Deixe a senha em branco para manter a atual
+          });
+        } catch (error) {
+          console.error("Erro ao buscar atendente", error);
+          setError('Erro ao carregar os dados do atendente.');
+        }
+      };
+      fetchAtendente();
+    }
+  }, [isEditMode, id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setAtendente({ ...atendente, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Aqui você pode adicionar a lógica para salvar o atendente
-    console.log('Dados do Atendente:', atendente);
-    navigate('/atendentes');
+    setLoading(true);
+    setError('');
+
+    try {
+      if (isEditMode) {
+        // Atualizar atendente
+        await serviceHome.atualizarCliente(id, {
+          ...atendente,
+          senha: atendente.senha || undefined, // Envia senha apenas se fornecida
+        });
+      } else {
+        // Criar novo atendente
+        await serviceHome.criarCliente(atendente);
+      }
+      navigate('/atendentes');
+    } catch (error) {
+      console.error('Erro ao salvar atendente', error);
+      setError('Erro ao salvar os dados do atendente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,13 +85,14 @@ const AtendenteForm = () => {
           </div>
         </div>
         <h1>{isEditMode ? 'Editar Atendente' : 'Criar Atendente'}</h1>
+        {error && <p className="error-message">{error}</p>}
         <form className="atendente-form" onSubmit={handleSubmit}>
           <label>
             Nome
             <input
               type="text"
-              name="name"
-              value={atendente.name}
+              name="nome"
+              value={atendente.nome}
               onChange={handleInputChange}
               required
             />
@@ -67,53 +108,34 @@ const AtendenteForm = () => {
             />
           </label>
           <label>
-            Telefone
-            <input
-              type="text"
-              name="phone"
-              value={atendente.phone}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label>
-            Setor
-            <input
-              type="text"
-              name="setor"
-              value={atendente.setor}
-              onChange={handleInputChange}
-              required
-            />
-          </label>
-          <label>
-            Status
+            Tipo de Usuário
             <select
-              name="status"
-              value={atendente.status}
+              name="tipoUsuario"
+              value={atendente.tipoUsuario}
               onChange={handleInputChange}
               required
+              disabled
             >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="ATENDENTE">Atendente</option>
             </select>
           </label>
           <label>
             Senha
             <input
               type="password"
-              name="password"
-              value={atendente.password}
+              name="senha"
+              value={atendente.senha}
               onChange={handleInputChange}
-              required
+              required={!isEditMode} // Senha obrigatória apenas na criação
+              placeholder={isEditMode ? 'Deixe em branco para manter a senha atual' : ''}
             />
           </label>
           <div className="form-buttons">
             <button type="button" onClick={() => navigate('/atendentes')} className="back-btn">
               Voltar
             </button>
-            <button type="submit" className="save-btn">
-              Salvar
+            <button type="submit" className="save-btn" disabled={loading}>
+              {loading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>

@@ -2,11 +2,16 @@ package com.arthenyo.api.services;
 
 import com.arthenyo.api.dtos.AcessoDTO;
 import com.arthenyo.api.dtos.ChamadoDTO;
+import com.arthenyo.api.dtos.UsuarioCreateDTO;
 import com.arthenyo.api.dtos.UsuarioDTO;
 import com.arthenyo.api.entities.Acesso;
+import com.arthenyo.api.entities.Auditoria;
 import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.Usuario;
+import com.arthenyo.api.entities.enums.TipoUsuario;
 import com.arthenyo.api.projections.UsuarioDetalhesProjection;
+import com.arthenyo.api.repositories.AcessoRepository;
+import com.arthenyo.api.repositories.AuditoriaRepository;
 import com.arthenyo.api.repositories.ChamadoRepository;
 import com.arthenyo.api.repositories.UsuarioRepository;
 import com.arthenyo.api.services.exception.DateBaseException;
@@ -14,6 +19,9 @@ import com.arthenyo.api.services.exception.ObjectNotFound;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,44 +44,61 @@ public class UsuarioService implements UserDetailsService {
     private AutenticacaoService autenticacaoService;
     @Autowired
     private ChamadoRepository chamadoRepository;
+    @Autowired
+    private AuditoriaRepository auditoriaRepository;
+    @Autowired
+    private AcessoRepository acessoRepository;
 
     @Transactional(readOnly = true)
     public UsuarioDTO usuarioLogado(){
         Usuario usuario = autenticacaoService.usuarioAutenticado();
         return new UsuarioDTO(usuario);
     }
-    public void favoritarOuDesfavoritarChamado(Long usuarioId, Long chamadoId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ObjectNotFound("Usuário não encontrado"));
-        Chamado chamado = chamadoRepository.findById(chamadoId)
-                .orElseThrow(() -> new ObjectNotFound("Chamado não encontrado"));
 
-        if (usuario.getChamadosFavoritos().contains(chamado)) {
-            usuario.getChamadosFavoritos().remove(chamado);
-        } else {
-            usuario.getChamadosFavoritos().add(chamado);
+    public Page<UsuarioDTO> buscarUsuariosPorTipo(TipoUsuario tipoUsuario, Pageable pageable) {
+        Page<Usuario> usuarios = usuarioRepository.findByTipoUsuario(tipoUsuario, pageable);
+
+        Page<UsuarioDTO> usuarioDTOs = new PageImpl<>(
+                usuarios.getContent().stream().map(UsuarioDTO::new).collect(Collectors.toList()),
+                pageable,
+                usuarios.getTotalElements()
+        );
+
+        return usuarioDTOs;
+    }
+
+    public UsuarioDTO salvarUsuario(UsuarioCreateDTO dto){
+        Usuario entity = new Usuario();
+        criarUsuario(entity, dto);
+        entity.setSenha(passwordEncoder.encode(dto.getSenha()));
+        if(entity.getTipoUsuario() == TipoUsuario.CLIENTE){
+            Acesso acesso = acessoRepository.findByNome("ROLE_CLIENTE");
+            entity.getAcessos().add(acesso);
+        }else {
+            Acesso acesso = acessoRepository.findByNome("ROLE_SUPORTE");
+            entity.getAcessos().add(acesso);
         }
 
-        usuarioRepository.save(usuario);
-    }
-    public List<ChamadoDTO> getChamadosFavoritos(Long usuarioId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new ObjectNotFound("Usuário não encontrado"));
-
-        return usuario.getChamadosFavoritos().stream()
-                .map(ChamadoDTO::new)
-                .collect(Collectors.toList());
-    }
-
-    public UsuarioDTO salvarUsuario(UsuarioDTO dto){
-        Usuario entity = new Usuario();
-        criarUsuario(entity,dto);
-        entity.setSenha(passwordEncoder.encode(dto.getSenha()));
         entity = usuarioRepository.save(entity);
+
+        Auditoria auditoria = new Auditoria();
+        auditoria.setUsuario(entity.getNome());
+        auditoria.setAcao("Criou");
+        if(entity.getTipoUsuario() == TipoUsuario.CLIENTE){
+            auditoria.setEntidade("Cliente");
+            auditoria.setDescricao("Cliente ID " + entity.getId());
+            auditoria.setTimestamp(Instant.now());
+        }else {
+            auditoria.setEntidade("Suporte");
+            auditoria.setDescricao("Suporte ID " + entity.getId());
+            auditoria.setTimestamp(Instant.now());
+        }
+        auditoriaRepository.save(auditoria);
+
         return new UsuarioDTO(entity);
     }
     @Transactional
-    public UsuarioDTO atualizarUsuario(Long id, UsuarioDTO userDTO){
+    public UsuarioDTO atualizarUsuario(Long id, UsuarioCreateDTO userDTO){
         try {
             Usuario entity = usuarioRepository.getReferenceById(id);
             criarUsuario(entity,userDTO);
@@ -94,28 +120,28 @@ public class UsuarioService implements UserDetailsService {
         }
     }
 
-    private void criarUsuario(Usuario entity, UsuarioDTO dto) {
+    private void criarUsuario(Usuario entity, UsuarioCreateDTO dto) {
         entity.setNome(dto.getNome());
         entity.setEmail(dto.getEmail());
-        for(AcessoDTO acessoDTO : dto.getAcessos()){
-            Acesso acesso = new Acesso();
-            acesso.setId(acessoDTO.getId());
-            entity.getAcessos().add(acesso);
-        }
+        entity.setTipoUsuario(dto.getTipoUsuario());
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         List<UsuarioDetalhesProjection> result = usuarioRepository.searchUserAndRolesByEmail(username);
-        if(result.size() == 0){
+        if(result.isEmpty()){
             throw new UsernameNotFoundException("Usuario nao encontrado");
         }
         Usuario usuario = new Usuario();
         usuario.setEmail(username);
         usuario.setSenha(result.get(0).getPassword());
-        for(UsuarioDetalhesProjection projection : result){
-            usuario.addAcesso(new Acesso(projection.getRoleId(),projection.getAuthority()));
+
+        for (UsuarioDetalhesProjection projection : result) {
+            if (projection.getAuthority() != null) {
+                usuario.addAcesso(new Acesso(projection.getRoleId(), projection.getAuthority()));
+            }
         }
         return usuario;
     }
+
 }

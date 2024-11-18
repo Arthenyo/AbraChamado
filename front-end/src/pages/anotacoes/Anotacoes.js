@@ -1,65 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
+import serviceHome from '../../Servicies/service';
+import authService from '../../Servicies/authService';
 import './Anotacoes.css';
 
 const Anotacoes = () => {
-  const [anotacoes, setAnotacoes] = useState([
-    { id: 1, title: 'Anotação 1', content: 'Conteúdo da anotação 1', createdAt: new Date(), updatedAt: new Date(), isPinned: false },
-    { id: 2, title: 'Anotação 2', content: 'Conteúdo da anotação 2', createdAt: new Date(), updatedAt: new Date(), isPinned: false },
-  ]);
-  const [newAnotacao, setNewAnotacao] = useState({ title: '', content: '' });
+  const [anotacoes, setAnotacoes] = useState([]);
+  const [newAnotacao, setNewAnotacao] = useState({ anotacao: '', fixo: false, autor: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [currentAnotacaoId, setCurrentAnotacaoId] = useState(null);
+  const [error, setError] = useState('');
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+
+  // Carregar anotações do backend ao montar o componente
+  useEffect(() => {
+    const fetchAnotacoes = async () => {
+      try {
+        const response = await serviceHome.obterAnotacoes();
+        setAnotacoes(response);
+      } catch (error) {
+        console.error('Erro ao carregar anotações', error);
+        setError('Erro ao carregar anotações.');
+      }
+    };
+
+    // Carregar informações do usuário logado
+    const fetchUsuarioLogado = async () => {
+      try {
+        const user = await authService.getLoggedUser();
+        setUsuarioLogado(user);
+      } catch (error) {
+        console.error('Erro ao obter usuário logado', error);
+        setError('Erro ao obter usuário logado.');
+      }
+    };
+
+    fetchAnotacoes();
+    fetchUsuarioLogado();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewAnotacao((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddAnotacao = () => {
-    if (newAnotacao.title && newAnotacao.content) {
-      setAnotacoes((prev) => [
-        ...prev,
-        { id: prev.length + 1, ...newAnotacao, createdAt: new Date(), updatedAt: new Date(), isPinned: false },
-      ]);
-      setNewAnotacao({ title: '', content: '' });
+  const handleAddAnotacao = async () => {
+    if (newAnotacao.anotacao && usuarioLogado) {
+      try {
+        const anotacaoComAutor = { ...newAnotacao, autor: usuarioLogado.nome };
+        const response = await serviceHome.criarAnotacao(anotacaoComAutor);
+        setAnotacoes((prev) => [...prev, response]);
+        setNewAnotacao({ anotacao: '', fixo: false, autor: '' });
+      } catch (error) {
+        console.error('Erro ao criar anotação', error);
+        setError('Erro ao criar anotação.');
+      }
     }
   };
 
   const handleEditAnotacao = (id) => {
     const anotacao = anotacoes.find((anotacao) => anotacao.id === id);
-    setNewAnotacao({ title: anotacao.title, content: anotacao.content });
+    setNewAnotacao({ anotacao: anotacao.anotacao, fixo: anotacao.fixo, autor: anotacao.autor?.nome });
     setIsEditing(true);
     setCurrentAnotacaoId(id);
   };
 
-  const handleUpdateAnotacao = () => {
-    setAnotacoes((prev) =>
-      prev.map((anotacao) =>
-        anotacao.id === currentAnotacaoId
-          ? { ...anotacao, title: newAnotacao.title, content: newAnotacao.content, updatedAt: new Date() }
-          : anotacao
-      )
-    );
-    setNewAnotacao({ title: '', content: '' });
-    setIsEditing(false);
-    setCurrentAnotacaoId(null);
+  const handleUpdateAnotacao = async () => {
+    try {
+      const response = await serviceHome.atualizarAnotacao(currentAnotacaoId, newAnotacao);
+      setAnotacoes((prev) =>
+        prev.map((anotacao) =>
+          anotacao.id === currentAnotacaoId ? response : anotacao
+        )
+      );
+      setNewAnotacao({ anotacao: '', fixo: false, autor: '' });
+      setIsEditing(false);
+      setCurrentAnotacaoId(null);
+    } catch (error) {
+      console.error('Erro ao atualizar anotação', error);
+      setError('Erro ao atualizar anotação.');
+    }
   };
 
-  const handleDeleteAnotacao = (id) => {
-    setAnotacoes((prev) => prev.filter((anotacao) => anotacao.id !== id));
+  const handleDeleteAnotacao = async (id) => {
+    try {
+      await serviceHome.deletarAnotacao(id);
+      setAnotacoes((prev) => prev.filter((anotacao) => anotacao.id !== id));
+    } catch (error) {
+      console.error('Erro ao excluir anotação', error);
+      setError('Erro ao excluir anotação.');
+    }
   };
 
-  const handlePinAnotacao = (id) => {
-    setAnotacoes((prev) =>
-      prev.map((anotacao) =>
-        anotacao.id === id ? { ...anotacao, isPinned: !anotacao.isPinned } : anotacao
-      )
-    );
+  const handlePinAnotacao = async (id) => {
+    const anotacao = anotacoes.find((anotacao) => anotacao.id === id);
+    const updatedAnotacao = { ...anotacao, fixo: !anotacao.fixo };
+    try {
+      const response = await serviceHome.atualizarAnotacao(id, updatedAnotacao);
+      setAnotacoes((prev) =>
+        prev.map((anotacao) => (anotacao.id === id ? response : anotacao))
+      );
+    } catch (error) {
+      console.error('Erro ao fixar/desfixar anotação', error);
+      setError('Erro ao fixar/desfixar anotação.');
+    }
   };
 
-  const sortedAnotacoes = [...anotacoes].sort((a, b) => b.isPinned - a.isPinned);
+  const sortedAnotacoes = [...anotacoes].sort((a, b) => b.fixo - a.fixo);
 
   return (
     <div className="container-dashboard-anotacoes">
@@ -73,8 +121,8 @@ const Anotacoes = () => {
           <div className="top-actions">
             <div className="profile">
               <div className="info">
-                <p>Olá, <b>Arthenyo</b></p>
-                <small className="text-muted">Admin</small>
+                <p>Olá, <b>{usuarioLogado?.nome || 'Usuário'}</b></p>
+                <small className="text-muted">{usuarioLogado?.tipoUsuario || 'Usuário'}</small>
               </div>
             </div>
             <ThemeToggler />
@@ -82,17 +130,10 @@ const Anotacoes = () => {
         </div>
         <h1>Anotações</h1>
         <div className="anotacao-form">
-          <input
-            type="text"
-            name="title"
-            placeholder="Título da anotação"
-            value={newAnotacao.title}
-            onChange={handleInputChange}
-          />
           <textarea
-            name="content"
+            name="anotacao"
             placeholder="Conteúdo da anotação"
-            value={newAnotacao.content}
+            value={newAnotacao.anotacao}
             onChange={handleInputChange}
           ></textarea>
           {isEditing ? (
@@ -101,20 +142,17 @@ const Anotacoes = () => {
             <button onClick={handleAddAnotacao}>Adicionar Anotação</button>
           )}
         </div>
+        {error && <p className="error-message">{error}</p>}
         <div className="anotacoes-list">
           {sortedAnotacoes.map((anotacao) => (
-            <div key={anotacao.id} className={`anotacao-item ${anotacao.isPinned ? 'pinned' : ''}`}>
-              <h3>{anotacao.title}</h3>
-              <p>{anotacao.content}</p>
-              <p className="dates">
-                Criado em: {anotacao.createdAt.toLocaleDateString()} {anotacao.createdAt.toLocaleTimeString()}<br />
-                Última atualização: {anotacao.updatedAt.toLocaleDateString()} {anotacao.updatedAt.toLocaleTimeString()}
-              </p>
+            <div key={anotacao.id} className={`anotacao-item ${anotacao.fixo ? 'pinned' : ''}`}>
+              <p>{anotacao.anotacao}</p>
+              <p className="autor-info">Autor: {anotacao.autor?.nome || 'Desconhecido'}</p>
               <div className="anotacao-actions">
                 <button onClick={() => handleEditAnotacao(anotacao.id)}>Editar</button>
                 <button onClick={() => handleDeleteAnotacao(anotacao.id)}>Excluir</button>
                 <button onClick={() => handlePinAnotacao(anotacao.id)}>
-                  {anotacao.isPinned ? 'Desfixar' : 'Fixar'}
+                  {anotacao.fixo ? 'Desfixar' : 'Fixar'}
                 </button>
               </div>
             </div>

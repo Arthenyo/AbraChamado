@@ -1,9 +1,11 @@
 package com.arthenyo.api.services;
 
 import com.arthenyo.api.dtos.ChamadoDTO;
+import com.arthenyo.api.entities.Auditoria;
 import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.Usuario;
 import com.arthenyo.api.entities.enums.StatusChamado;
+import com.arthenyo.api.repositories.AuditoriaRepository;
 import com.arthenyo.api.repositories.ChamadoRepository;
 import com.arthenyo.api.repositories.UsuarioRepository;
 import com.arthenyo.api.services.exception.DateBaseException;
@@ -11,11 +13,17 @@ import com.arthenyo.api.services.exception.ObjectNotFound;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,21 +32,38 @@ public class ChamadoService {
     private ChamadoRepository chamadoRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+    @Autowired
+    private AuditoriaRepository auditoriaRepository;
 
-    public long getTotalChamados() {
-        return chamadoRepository.countTotalChamados();
+    public Map<StatusChamado, Long> contarChamadosPorStatus(String data) {
+        List<Object[]> resultados = chamadoRepository.countChamadosGroupedByStatus(data);
+        Map<StatusChamado, Long> contagemPorStatus = new HashMap<>();
+
+        for (Object[] resultado : resultados) {
+            StatusChamado status = (StatusChamado) resultado[0];
+            Long contagem = (Long) resultado[1];
+            contagemPorStatus.put(status, contagem);
+        }
+
+        return contagemPorStatus;
+    }
+    public Long contarChamadosPorDia(String data) {
+        return chamadoRepository.countChamadosByData(data);
     }
 
-    public long getTotalChamadosAbertos() {
-        return chamadoRepository.countByStatusChamado(StatusChamado.ABERTO);
+    public Page<ChamadoDTO> todosOsChamados(Pageable pageable){
+        Page<Chamado> page = chamadoRepository.findAll(pageable);
+        return page.map(x -> new ChamadoDTO(x));
+    }
+    public ChamadoDTO ChamadoId(Long id){
+        Chamado chamado = chamadoRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFound("Chamado nao Encontrado"));
+        return new ChamadoDTO(chamado);
     }
 
-    public long getTotalChamadosFinalizados() {
-        return chamadoRepository.countByStatusChamado(StatusChamado.FECHADO);
-    }
-    public List<ChamadoDTO> getTop5ChamadosAbertos() {
-        List<Chamado> chamados = chamadoRepository.findTop5ChamadosAbertos();
-        return chamados.stream().map(ChamadoDTO::new).collect(Collectors.toList());
+    public List<Chamado> obterUltimosTresChamados() {
+        PageRequest pageable = PageRequest.of(0, 3);
+        return chamadoRepository.findTopChamados(pageable);
     }
 
     public ChamadoDTO salvarChamado(ChamadoDTO dto){
@@ -47,6 +72,15 @@ public class ChamadoService {
         entity.setStatusChamado(StatusChamado.ABERTO);
         entity.setCriacaoChamado(Instant.now());
         entity = chamadoRepository.save(entity);
+
+        Auditoria auditoria = new Auditoria();
+        auditoria.setUsuario(entity.getUsuario().getNome());
+        auditoria.setAcao("Criou");
+        auditoria.setEntidade("Chamado");
+        auditoria.setDescricao("Chamado ID " + entity.getId());
+        auditoria.setTimestamp(Instant.now());
+        auditoriaRepository.save(auditoria);
+
         return new ChamadoDTO(entity);
     }
     @Transactional
@@ -55,6 +89,15 @@ public class ChamadoService {
             Chamado entity = chamadoRepository.getReferenceById(id);
             criarChamado(entity,userDTO);
             entity = chamadoRepository.save(entity);
+
+            Auditoria auditoria = new Auditoria();
+            auditoria.setUsuario(entity.getUsuario().getNome());
+            auditoria.setAcao("Criou");
+            auditoria.setEntidade("Chamado");
+            auditoria.setDescricao("Chamado ID " + entity.getId());
+            auditoria.setTimestamp(Instant.now());
+            auditoriaRepository.save(auditoria);
+
             return new ChamadoDTO(entity);
         }catch (EntityNotFoundException e){
             throw new ObjectNotFound("chamado nao encontrada " + id);
@@ -78,6 +121,8 @@ public class ChamadoService {
         if(dto.getStatusChamado() == StatusChamado.FECHADO){
             entity.setTerminoChamado(Instant.now());
         }
+        entity.setPrioridadeChamado(dto.getPrioridadeChamado());
+        entity.setSetor(dto.getSetor());
         Usuario usuario = usuarioRepository.findByNome(dto.getUsuario());
         if(usuario == null){
             throw new ObjectNotFound("Usuario nao encontrado " + dto.getUsuario());

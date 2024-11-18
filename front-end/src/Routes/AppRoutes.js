@@ -8,21 +8,25 @@ import Reuniao from "../pages/reuniao/Reuniao";
 import Relatorios from "../pages/relatorios/Relatorios";
 import DetalhesChamado from "../pages/chamados/DetalhesChamado";
 import FormularioCliente from "../pages/clientes/FormularioCliente";
-import FormularioAtendente from "../pages/atendentes/AtendenteForm";
+import Login from "../pages/login/Login"; // Importando a página de Login
+import AtendenteForm from "../pages/atendentes/AtendenteForm"; // Importando a página do formulário de Atendente
+import AbrirChamado from '../pages/abrirChamado/AbrirChamado';
 
 export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/chamados" element={<Chamados />} />
         <Route path="/chamados/:id" element={<DetalhesChamado />} />
+        <Route path="/abrir-chamado" element={<AbrirChamado />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/clientes/novo" element={<FormularioCliente />} />
         <Route path="/clientes/:id/editar" element={<FormularioCliente />} />
         <Route path="/atendentes" element={<Atendentes />} />
-        <Route path="/atendentes/novo" element={<FormularioAtendente />} />
-        <Route path="/atendentes/:id/editar" element={<FormularioAtendente />} />
+        <Route path="/atendentes/novo" element={<AtendenteForm />} />
+        <Route path="/atendentes/:id/editar" element={<AtendenteForm />} />
         <Route path="/anotacoes" element={<Anotacoes />} />
         <Route path="/reuniao" element={<Reuniao />} />
         <Route path="/relatorios" element={<Relatorios />} />

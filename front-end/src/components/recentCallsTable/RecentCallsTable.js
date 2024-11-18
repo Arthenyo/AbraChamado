@@ -1,34 +1,59 @@
+// RecentCallsTable.js
+import React, { useEffect, useState } from 'react';
+import serviceHome from '../../Servicies/service';
+
 const RecentCallsTable = () => {
-    return (
-      <div className="recent-called-dashboard">
-        <h2>Chamados Recentes</h2>
-        <table>
-          <thead>
+  const [recentCalls, setRecentCalls] = useState([]);
+
+  useEffect(() => {
+    // Função para buscar os últimos cinco chamados
+    const fetchRecentCalls = async () => {
+      try {
+        const data = await serviceHome.obterUltimosTresChamados();
+        setRecentCalls(data);
+      } catch (error) {
+        console.error("Erro ao obter os últimos cinco chamados", error);
+      }
+    };
+
+    fetchRecentCalls();
+  }, []);
+
+  return (
+    <div className="recent-called-dashboard">
+      <h2>Chamados Recentes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Assunto</th>
+            <th>Cliente</th>
+            <th>Prioridade</th>
+            <th>Atendente</th>
+            <th>Setor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {recentCalls.length > 0 ? (
+            recentCalls.map((chamado) => (
+              <tr key={chamado.id}>
+                <td>{chamado.titulo}</td>
+                <td>{chamado.usuario ? chamado.usuario.nome : 'N/A'}</td>
+                <td>{chamado.statusChamado}</td>
+                <td>{chamado.atendente ? chamado.atendente.nome : 'N/A'}</td>
+                <td>{chamado.setor || 'N/A'}</td> {/* Presumindo que o setor esteja disponível */}
+                <td className={`status-${chamado.statusChamado.toLowerCase()}`}>{chamado.statusChamado}</td>
+              </tr>
+            ))
+          ) : (
             <tr>
-              <th>Assunto</th>
-              <th>cliente</th>
-              <th>prioridade</th>
-              <th>atendente</th>
-              <th>setor</th>
-              <th>Status</th>
-              <th></th>
+              <td colSpan="7">Nenhum chamado recente encontrado.</td>
             </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Problema no Sistema</td>
-              <td>Empresa ABC</td>
-              <td>Alta</td>
-              <td>João Silva</td>
-              <td>Suporte Técnico</td>
-              <td className="warning">Em Andamento</td>
-              <td className="primary">detalhes</td>
-            </tr>
-          </tbody>
-        </table>
-        <a href="#">mostrar tudo</a>
-      </div>
-    );
-  };
-  
-  export default RecentCallsTable;
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
+export default RecentCallsTable;

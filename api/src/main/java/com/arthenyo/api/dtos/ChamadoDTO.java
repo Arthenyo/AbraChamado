@@ -2,6 +2,7 @@ package com.arthenyo.api.dtos;
 
 import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.Usuario;
+import com.arthenyo.api.entities.enums.PrioridadeChamado;
 import com.arthenyo.api.entities.enums.StatusChamado;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -15,17 +16,20 @@ public class ChamadoDTO {
     private String titulo;
     private String descricao;
     private StatusChamado statusChamado;
+    private PrioridadeChamado prioridadeChamado;
+    private String setor;
     private Instant criacaoChamado;
     private Instant terminoChamado;
     private String usuario;
     private String atendente;
-    private List<String> favoritadoPor = new ArrayList<>();
 
-    public ChamadoDTO(Long id, String titulo, String descricao, StatusChamado statusChamado, Instant criacaoChamado, Instant terminoChamado, String usuario, String atendente) {
+    public ChamadoDTO(Long id, String titulo, String descricao, StatusChamado statusChamado, PrioridadeChamado prioridadeChamado, String setor, Instant criacaoChamado, Instant terminoChamado, String usuario, String atendente) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
-        this.statusChamado = statusChamado;
+        this.statusChamado = StatusChamado.ABERTO;
+        this.prioridadeChamado = prioridadeChamado;
+        this.setor = setor;
         this.criacaoChamado = criacaoChamado;
         this.terminoChamado = terminoChamado;
         this.usuario = usuario;
@@ -37,11 +41,12 @@ public class ChamadoDTO {
         titulo = entity.getTitulo();
         descricao = entity.getDescricao();
         statusChamado = entity.getStatusChamado();
+        prioridadeChamado = entity.getPrioridadeChamado();
+        setor = entity.getSetor();
         criacaoChamado = entity.getCriacaoChamado();
         terminoChamado = entity.getTerminoChamado();
         usuario = entity.getUsuario().getNome();
         atendente = entity.getAtendente().getNome();
-        favoritadoPor = entity.getFavoritadoPor().stream().map(Usuario::getNome).collect(Collectors.toList());
     }
 
     public Long getId() {
@@ -60,6 +65,14 @@ public class ChamadoDTO {
         return statusChamado;
     }
 
+    public PrioridadeChamado getPrioridadeChamado() {
+        return prioridadeChamado;
+    }
+
+    public String getSetor() {
+        return setor;
+    }
+
     public Instant getCriacaoChamado() {
         return criacaoChamado;
     }
@@ -74,8 +87,5 @@ public class ChamadoDTO {
 
     public String getAtendente() {
         return atendente;
-    }
-    public List<String> getFavoritadoPor() {
-        return favoritadoPor;
     }
 }

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
+import serviceHome from '../../Servicies/service';
+import authService from '../../Servicies/authService'; // Importando authService
 import { jsPDF } from 'jspdf';
 import './Relatorios.css';
 
@@ -13,6 +15,21 @@ const Relatorios = () => {
 
   const [periodo, setPeriodo] = useState({ inicio: '', fim: '' });
   const [relatorioSelecionado, setRelatorioSelecionado] = useState(null);
+  const [usuarioLogado, setUsuarioLogado] = useState(null);
+
+  useEffect(() => {
+    // Carregar informações do usuário logado
+    const fetchUsuarioLogado = async () => {
+      try {
+        const user = await authService.getLoggedUser();
+        setUsuarioLogado(user);
+      } catch (error) {
+        console.error('Erro ao obter usuário logado', error);
+      }
+    };
+
+    fetchUsuarioLogado();
+  }, []);
 
   const handlePeriodoChange = (e) => {
     const { name, value } = e.target;
@@ -55,8 +72,8 @@ const Relatorios = () => {
           <div className="top-actions">
             <div className="profile">
               <div className="info">
-                <p>Olá, <b>Arthenyo</b></p>
-                <small className="text-muted">Admin</small>
+                <p>Olá, <b>{usuarioLogado?.nome || 'Usuário'}</b></p>
+                <small className="text-muted">{usuarioLogado?.tipoUsuario || 'Usuário'}</small>
               </div>
             </div>
             <ThemeToggler />

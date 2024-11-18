@@ -116,7 +116,7 @@
   font-weight: bold;
 }
 
-.status-resolvido {
+.status-fechado {
   color: var(--color-success);
   font-weight: bold;
 }

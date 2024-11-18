@@ -9,17 +9,4 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface AnotacoesRepository extends JpaRepository<Anotacoes,Long> {
-    @Query("SELECT a FROM Anotacoes a WHERE a.fixo = true")
-    List<Anotacoes> findAnotacoesFixadas();
-
-    @Query("SELECT a FROM Anotacoes a WHERE a.fixo = false ORDER BY a.id DESC")
-    List<Anotacoes> findUltimasAnotacoesNaoFixadas(Pageable pageable);
-
-    default List<Anotacoes> findTop5Anotacoes() {
-        List<Anotacoes> fixadas = findAnotacoesFixadas();
-        int restante = 5 - fixadas.size();
-        List<Anotacoes> naoFixadas = findUltimasAnotacoesNaoFixadas(PageRequest.of(0, restante));
-        fixadas.addAll(naoFixadas);
-        return fixadas;
-    }
 }

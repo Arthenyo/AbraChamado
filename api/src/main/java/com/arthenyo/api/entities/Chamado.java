@@ -1,5 +1,6 @@
 package com.arthenyo.api.entities;
 
+import com.arthenyo.api.entities.enums.PrioridadeChamado;
 import com.arthenyo.api.entities.enums.StatusChamado;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,9 @@ public class Chamado {
     private String descricao;
     @Enumerated(EnumType.STRING)
     private StatusChamado statusChamado;
+    @Enumerated(EnumType.STRING)
+    private PrioridadeChamado prioridadeChamado;
+    private String setor;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
     private Instant criacaoChamado;
     @Column(columnDefinition = "TIMESTAMP WITHOUT TIME ZONE")
@@ -33,6 +37,4 @@ public class Chamado {
     @ManyToOne
     @JoinColumn(name = "atendente_id")
     private Usuario atendente;
-    @ManyToMany(mappedBy = "chamadosFavoritos")
-    private List<Usuario> favoritadoPor;
 }

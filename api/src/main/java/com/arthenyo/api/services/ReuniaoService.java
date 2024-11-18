@@ -13,12 +13,21 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class ReuniaoService {
     @Autowired
     private ReuniaoRepository reuniaoRepository;
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Transactional(readOnly = true)
+    public List<ReuniaoDTO> buscarTodasReunioes() {
+        List<Reuniao> reunioes = reuniaoRepository.findAll();
+        return reunioes.stream().map(ReuniaoDTO::new).collect(Collectors.toList());
+    }
 
     public ReuniaoDTO salvarReuniao(ReuniaoDTO dto){
         Reuniao entity = new Reuniao();

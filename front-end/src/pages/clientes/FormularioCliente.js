@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
+import serviceHome from '../../Servicies/service';
 import './FormularioCliente.css';
 
 const FormularioCliente = () => {
@@ -8,23 +9,62 @@ const FormularioCliente = () => {
   const navigate = useNavigate();
   const [cliente, setCliente] = useState(location.state?.cliente || {
     id: '',
-    name: '',
+    nome: '',
     email: '',
-    phone: '',
-    address: '',
-    status: 'Ativo',
-    password: '',
+    senha: '',
+    tipoUsuario: 'CLIENTE', // valor padrão para novos clientes
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (location.state?.cliente?.id) {
+      // Se estiver editando, buscar o cliente usando o ID
+      const fetchCliente = async () => {
+        try {
+          const response = await serviceHome.buscarClientePorId(location.state.cliente.id);
+          setCliente({
+            ...response,
+            senha: '', // Deixe a senha em branco para manter a atual
+          });
+        } catch (error) {
+          console.error("Erro ao buscar cliente", error);
+          setError('Erro ao carregar os dados do cliente.');
+        }
+      };
+      fetchCliente();
+    }
+  }, [location.state]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setCliente({ ...cliente, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Cliente salvo:', cliente);
-    navigate('/clientes');
+    setLoading(true);
+    setError('');
+
+    try {
+      if (cliente.id) {
+        // Editar cliente
+        await serviceHome.atualizarCliente(cliente.id, {
+          ...cliente,
+          senha: cliente.senha || undefined, // Envia senha apenas se fornecida
+        });
+      } else {
+        // Criar novo cliente
+        await serviceHome.criarCliente(cliente);
+      }
+      navigate('/clientes');
+    } catch (error) {
+      console.error('Erro ao salvar cliente', error);
+      setError('Erro ao salvar os dados do cliente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleBack = () => {
@@ -37,14 +77,15 @@ const FormularioCliente = () => {
       <main className="formulario-cliente-main">
         <button className="back-btn" onClick={handleBack}>Voltar</button>
         <h1>{cliente.id ? 'Editar Cliente' : 'Criar Cliente'}</h1>
+        {error && <p className="error-message">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Nome</label>
+            <label htmlFor="nome">Nome</label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={cliente.name}
+              id="nome"
+              name="nome"
+              value={cliente.nome}
               onChange={handleInputChange}
               required
             />
@@ -61,52 +102,34 @@ const FormularioCliente = () => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="phone">Telefone</label>
-            <input
-              type="text"
-              id="phone"
-              name="phone"
-              value={cliente.phone}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="address">Endereço</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={cliente.address}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="status">Status</label>
+            <label htmlFor="tipoUsuario">Tipo de Usuário</label>
             <select
-              id="status"
-              name="status"
-              value={cliente.status}
+              id="tipoUsuario"
+              name="tipoUsuario"
+              value={cliente.tipoUsuario}
               onChange={handleInputChange}
+              required
             >
-              <option value="Ativo">Ativo</option>
-              <option value="Inativo">Inativo</option>
+              <option value="CLIENTE">Cliente</option>
+              <option value="ADMIN">Admin</option>
+              <option value="SUPORTE">Suporte</option>
             </select>
           </div>
           <div className="form-group">
-            <label htmlFor="password">Senha</label>
+            <label htmlFor="senha">Senha</label>
             <input
               type="password"
-              id="password"
-              name="password"
-              value={cliente.password}
+              id="senha"
+              name="senha"
+              value={cliente.senha}
               onChange={handleInputChange}
-              required={!cliente.id}
               placeholder={cliente.id ? 'Deixe em branco para manter a senha atual' : ''}
+              required={!cliente.id} // Senha obrigatória apenas na criação
             />
           </div>
-          <button type="submit" className="save-btn">Salvar</button>
+          <button type="submit" className="save-btn" disabled={loading}>
+            {loading ? 'Salvando...' : 'Salvar'}
+          </button>
         </form>
       </main>
     </div>

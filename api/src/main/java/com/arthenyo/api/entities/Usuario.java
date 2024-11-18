@@ -1,5 +1,6 @@
 package com.arthenyo.api.entities;
 
+import com.arthenyo.api.entities.enums.TipoUsuario;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,18 +22,13 @@ public class Usuario implements UserDetails {
     private String nome;
     private String email;
     private String senha;
+    @Enumerated(EnumType.STRING)
+    private TipoUsuario tipoUsuario;
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tb_usuario_acesso",
             joinColumns = @JoinColumn(name = "usuario_id"),
             inverseJoinColumns = @JoinColumn(name = "acesso_id"))
     private Set<Acesso> acessos = new HashSet<>();
-    @ManyToMany
-    @JoinTable(
-            name = "usuario_chamado_favorito",
-            joinColumns = @JoinColumn(name = "usuario_id"),
-            inverseJoinColumns = @JoinColumn(name = "chamado_id")
-    )
-    private List<Chamado> chamadosFavoritos = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

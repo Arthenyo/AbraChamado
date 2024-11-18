@@ -50,4 +50,7 @@
   p {
     color: var(--color-dark-variant);
   }
+  .primary{
+    color: var(--color-primary);
+  }
   

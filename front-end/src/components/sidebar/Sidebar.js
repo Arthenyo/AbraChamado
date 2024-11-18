@@ -24,13 +24,17 @@ const Sidebar = () => {
         </div>
       </div>
       <div className="sidebar">
-        <Link to="/" className={activeLink === '/' ? 'active' : ''} onClick={() => handleLinkClick('/')}>
+        <Link to="/home" className={activeLink === '/home' ? 'active' : ''} onClick={() => handleLinkClick('/home')}>
           <span className="material-icons-sharp">dashboard</span>
           <h3>Dashboard</h3>
         </Link>
         <Link to="/chamados" className={activeLink === '/chamados' ? 'active' : ''} onClick={() => handleLinkClick('/chamados')}>
           <span className="material-icons-sharp">assignment</span>
           <h3>Chamados</h3>
+        </Link>
+        <Link to="/abrir-chamado" className={activeLink === '/abrir-chamado' ? 'active' : ''} onClick={() => handleLinkClick('/abrir-chamado')}>
+          <span className="material-icons-sharp">add_circle_outline</span> {/* Ícone adicionado */}
+          <h3>Abrir Chamado</h3>
         </Link>
         <Link to="/clientes" className={activeLink === '/clientes' ? 'active' : ''} onClick={() => handleLinkClick('/clientes')}>
           <span className="material-icons-sharp">people</span>
@@ -44,7 +48,7 @@ const Sidebar = () => {
           <span className="material-icons-sharp">note</span>
           <h3>Anotações</h3>
         </Link>
-        <Link to="/reuniao" className={activeLink === '/reunioes' ? 'active' : ''} onClick={() => handleLinkClick('/reunioes')}>
+        <Link to="/reuniao" className={activeLink === '/reuniao' ? 'active' : ''} onClick={() => handleLinkClick('/reuniao')}>
           <span className="material-icons-sharp">event</span>
           <h3>Reuniões</h3>
         </Link>
@@ -52,7 +56,7 @@ const Sidebar = () => {
           <span className="material-icons-sharp">bar_chart</span>
           <h3>Relatórios</h3>
         </Link>
-        <Link to="#" className={activeLink === '/sair' ? 'active' : ''} onClick={() => handleLinkClick('/sair')}>
+        <Link to="/sair" className={activeLink === '/sair' ? 'active' : ''} onClick={() => handleLinkClick('/sair')}>
           <span className="material-icons-sharp">logout</span>
           <h3>Sair</h3>
         </Link>
