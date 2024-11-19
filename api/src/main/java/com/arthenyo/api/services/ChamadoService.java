@@ -65,6 +65,11 @@ public class ChamadoService {
         PageRequest pageable = PageRequest.of(0, 3);
         return chamadoRepository.findTopChamados(pageable);
     }
+    public List<ChamadoDTO> buscarChamadosPorTitulo(String titulo) {
+        List<Chamado> chamados = chamadoRepository.findByTituloContainingIgnoreCase(titulo);
+        return chamados.stream().map(ChamadoDTO::new).collect(Collectors.toList());
+    }
+
 
     public ChamadoDTO salvarChamado(ChamadoDTO dto){
         Chamado entity = new Chamado();

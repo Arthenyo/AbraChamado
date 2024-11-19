@@ -57,6 +57,13 @@ public class ChamadoController {
         ChamadoDTO chamadoDTO = chamadoService.ChamadoId(id);
         return ResponseEntity.ok().body(chamadoDTO);
     }
+    @GetMapping("/buscarPorTitulo")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
+    public ResponseEntity<List<ChamadoDTO>> buscarChamadosPorTitulo(@RequestParam String titulo) {
+        List<ChamadoDTO> chamados = chamadoService.buscarChamadosPorTitulo(titulo);
+        return ResponseEntity.ok().body(chamados);
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
     public ResponseEntity<ChamadoDTO> salvarChamado(@RequestBody ChamadoDTO dto){

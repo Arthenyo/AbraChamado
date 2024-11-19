@@ -64,6 +64,18 @@ const serviceHome = {
   }
 },
 
+async buscarChamadosPorTitulo(titulo) {
+  try {
+    const response = await axios.get(`${baseURL}/chamado/buscarPorTitulo`, {
+      params: { titulo },
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao buscar chamados por título", error);
+    throw error;
+  }
+},
 
   async obterAuditoriasRecentes() {
     try {

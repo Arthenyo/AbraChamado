@@ -14,6 +14,7 @@ const Chamados = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [userRole, setUserRole] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     // Chama o serviço para obter o usuário logado
@@ -62,14 +63,35 @@ const Chamados = () => {
     }
   };
 
+  const handleSearch = async () => {
+    if (searchQuery.trim() !== '') {
+      try {
+        const response = await serviceHome.buscarChamadosPorTitulo(searchQuery);
+        setChamados(response);
+        setTotalPages(1); // Ao buscar, redefinir a paginação para 1 página apenas
+        setCurrentPage(0); // Resetar a página atual
+      } catch (error) {
+        console.error('Erro ao buscar chamados', error);
+      }
+    } else {
+      // Se a busca estiver vazia, buscar chamados normalmente
+      fetchChamados(currentPage, chamadosPerPage);
+    }
+  };
+
   return (
     <div className="container-dashboard-chamados">
       <Sidebar />
       <main className="chamados-main">
         <div className="top-bar">
           <div className="search-bar">
-            <input type="text" placeholder="Pesquisar por chamado..." />
-            <button>Pesquisar</button>
+            <input
+              type="text"
+              placeholder="Pesquisar por chamado..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button onClick={handleSearch}>Pesquisar</button>
           </div>
           <div className="top-actions">
             <div className="profile">
