@@ -24,6 +24,13 @@ public class ReuniaoController {
         List<ReuniaoDTO> reunioes = reuniaoService.buscarTodasReunioes();
         return ResponseEntity.ok().body(reunioes);
     }
+    @GetMapping("/buscar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
+    public ResponseEntity<List<ReuniaoDTO>> buscarReunioesPorTexto(@RequestParam("texto") String texto) {
+        List<ReuniaoDTO> reunioes = reuniaoService.buscarReuniaoPorTexto(texto);
+        return ResponseEntity.ok().body(reunioes);
+    }
+
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")

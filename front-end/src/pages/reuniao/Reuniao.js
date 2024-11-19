@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
 import serviceHome from '../../Servicies/service';
-import authService from '../../Servicies/authService'; // Importando authService
+import authService from '../../Servicies/authService';
 import './Reuniao.css';
 
 const Reuniao = () => {
@@ -16,6 +16,7 @@ const Reuniao = () => {
   });
   const [error, setError] = useState('');
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Carregar reuniões do backend ao montar o componente
   useEffect(() => {
@@ -73,14 +74,33 @@ const Reuniao = () => {
     }
   };
 
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearch = async () => {
+    try {
+      const response = await serviceHome.buscarReunioesPorTexto(searchTerm);
+      setReunioes(response);
+    } catch (error) {
+      console.error('Erro ao buscar reuniões', error);
+      setError('Erro ao buscar reuniões.');
+    }
+  };
+
   return (
     <div className="container-dashboard-reuniao">
       <Sidebar />
       <main className="reuniao-main">
         <div className="top-bar">
           <div className="search-bar">
-            <input type="text" placeholder="Pesquisar por reunião..." />
-            <button>Pesquisar</button>
+            <input
+              type="text"
+              placeholder="Pesquisar por reunião..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <button onClick={handleSearch}>Pesquisar</button>
           </div>
           <div className="top-actions">
             <div className="profile">

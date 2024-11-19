@@ -293,6 +293,19 @@ async buscarChamadosPorTitulo(titulo) {
       throw error;
     }
   },
+
+  async buscarReunioesPorTexto(texto) {
+    try {
+      const response = await axios.get(`${baseURL}/reuniao/buscar`, {
+        params: { texto },
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar reuniões por texto", error);
+      throw error;
+    }
+  },  
 };
 
 export default serviceHome;

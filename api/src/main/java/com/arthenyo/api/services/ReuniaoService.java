@@ -28,6 +28,12 @@ public class ReuniaoService {
         List<Reuniao> reunioes = reuniaoRepository.findAll();
         return reunioes.stream().map(ReuniaoDTO::new).collect(Collectors.toList());
     }
+    @Transactional(readOnly = true)
+    public List<ReuniaoDTO> buscarReuniaoPorTexto(String texto) {
+        List<Reuniao> reunioes = reuniaoRepository.buscarPorTituloOuDescricao(texto);
+        return reunioes.stream().map(ReuniaoDTO::new).collect(Collectors.toList());
+    }
+
 
     public ReuniaoDTO salvarReuniao(ReuniaoDTO dto){
         Reuniao entity = new Reuniao();
