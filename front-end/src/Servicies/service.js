@@ -305,7 +305,109 @@ async buscarChamadosPorTitulo(titulo) {
       console.error("Erro ao buscar reuniões por texto", error);
       throw error;
     }
-  },  
+  }, 
+  
+  async gerarRelatorioChamadosAbertos(inicio, fim) {
+    try {
+      if (!inicio || !fim) {
+        throw new Error('Parâmetros de data estão faltando.');
+      }
+      const response = await axios.get(`${baseURL}/relatorios/chamados-abertos`, {
+        params: { inicio, fim },
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao gerar relatório de chamados abertos", error);
+      throw error;
+    }
+  },
+   
+  // Adicionados métodos para gerar relatórios específicos
+
+async gerarRelatorioChamadosResolvidos(inicio, fim) {
+  try {
+    if (!inicio || !fim) {
+      throw new Error('Parâmetros de data estão faltando.');
+    }
+    const response = await axios.get(`${baseURL}/relatorios/chamados-resolvidos`, {
+      params: { inicio, fim },
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao gerar relatório de chamados resolvidos", error);
+    throw error;
+  }
+},
+
+async gerarRelatorioDesempenhoTecnico(inicio, fim) {
+  try {
+    if (!inicio || !fim) {
+      throw new Error('Parâmetros de data estão faltando.');
+    }
+    const response = await axios.get(`${baseURL}/relatorios/desempenho-tecnico`, {
+      params: { inicio, fim },
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao gerar relatório de desempenho dos técnicos", error);
+    throw error;
+  }
+},
+
+async gerarRelatorioClientesAtivos(inicio, fim) {
+  try {
+    if (!inicio || !fim) {
+      throw new Error('Parâmetros de data estão faltando.');
+    }
+    const response = await axios.get(`${baseURL}/relatorios/clientes-ativos`, {
+      params: { inicio, fim },
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao gerar relatório de clientes ativos", error);
+    throw error;
+  }
+},
+
+
+// Exemplo de chamada para relatórios adicionais
+async gerarRelatorioChamadosPorPrioridade(inicio, fim) {
+  try {
+    if (!inicio || !fim) {
+      throw new Error('Parâmetros de data estão faltando.');
+    }
+    const response = await axios.get(`${baseURL}/relatorios/chamados-por-prioridade`, {
+      params: { inicio, fim },
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao gerar relatório de chamados por prioridade", error);
+    throw error;
+  }
+},
+
+async gerarRelatorioChamadosPorSetor(inicio, fim) {
+  try {
+    if (!inicio || !fim) {
+      throw new Error('Parâmetros de data estão faltando.');
+    }
+    const response = await axios.get(`${baseURL}/relatorios/chamados-por-setor`, {
+      params: { inicio, fim },
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao gerar relatório de chamados por setor", error);
+    throw error;
+  }
+},
+
+  
 };
 
 export default serviceHome;
