@@ -23,4 +23,6 @@ public interface UsuarioRepository extends JpaRepository<Usuario,Long> {
 	List<UsuarioDetalhesProjection> searchUserAndRolesByEmail(String email);
 
 	Page<Usuario> findByTipoUsuario(TipoUsuario tipoUsuario, Pageable pageable);
+	List<Usuario> findByNomeContainingIgnoreCaseAndTipoUsuario(String nome, TipoUsuario tipoUsuario);
+
 }

@@ -158,6 +158,34 @@ async buscarChamadosPorTitulo(titulo) {
     }
   },
 
+  async buscarClientesPorNome(nome) {
+    try {
+      const response = await axios.get(`${baseURL}/usuario/buscarPorNome`, {
+        params: { nome },
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar clientes por nome", error);
+      throw error;
+    }
+  },
+
+  async buscarAtendentesPorNome(nome) {
+    try {
+      const response = await axios.get(`${baseURL}/usuario/buscarAtendentesPorNome`, {
+        params: { nome },
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar atendentes por nome", error);
+      throw error;
+    }
+  },
+  
+  
+
   async criarAnotacao(anotacao) {
     try {
       const response = await axios.post(`${baseURL}/anotacoes`, anotacao, {

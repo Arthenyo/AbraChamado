@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
 import serviceHome from '../../Servicies/service';
-import authService from '../../Servicies/authService'; // Importar o authService para obter dados do usuário logado
+import authService from '../../Servicies/authService';
 import './Atendentes.css';
 
 const Atendentes = () => {
@@ -14,6 +14,7 @@ const Atendentes = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [userRole, setUserRole] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchAtendentes(currentPage, atendentesPerPage);
@@ -59,14 +60,35 @@ const Atendentes = () => {
     navigate('/atendentes/novo');
   };
 
+  const handleSearch = async () => {
+    if (searchQuery.trim() !== '') {
+      try {
+        const response = await serviceHome.buscarAtendentesPorNome(searchQuery);
+        setAtendentes(response);
+        setTotalPages(1); // Ao buscar, redefinir a paginação para 1 página apenas
+        setCurrentPage(0); // Resetar a página atual
+      } catch (error) {
+        console.error('Erro ao buscar atendentes', error);
+      }
+    } else {
+      // Se a busca estiver vazia, buscar atendentes normalmente
+      fetchAtendentes(currentPage, atendentesPerPage);
+    }
+  };
+
   return (
     <div className="container-dashboard-atendentes">
       <Sidebar />
       <main className="atendentes-main">
         <div className="top-bar">
           <div className="search-bar">
-            <input type="text" placeholder="Pesquisar por atendente..." />
-            <button>Pesquisar</button>
+            <input
+              type="text"
+              placeholder="Pesquisar por atendente..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button onClick={handleSearch}>Pesquisar</button>
             <button className="create-btn" onClick={handleCreateAtendente}>Criar Atendente</button>
           </div>
           <div className="top-actions">
@@ -98,7 +120,7 @@ const Atendentes = () => {
                   <td>{atendente.nome}</td>
                   <td>{atendente.email}</td>
                   <td>{atendente.tipoUsuario}</td>
-                  <td><button className="details-btn" onClick={() => handleEditAtendente(atendente)}>Editar</button></td>
+                  <td><button className="edit-btn" onClick={() => handleEditAtendente(atendente)}>Editar</button></td>
                 </tr>
               ))
             ) : (

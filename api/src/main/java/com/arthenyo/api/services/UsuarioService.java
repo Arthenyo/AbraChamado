@@ -66,6 +66,15 @@ public class UsuarioService implements UserDetailsService {
 
         return usuarioDTOs;
     }
+    public List<UsuarioDTO> buscarClientesPorNome(String nome) {
+        List<Usuario> usuarios = usuarioRepository.findByNomeContainingIgnoreCaseAndTipoUsuario(nome, TipoUsuario.CLIENTE);
+        return usuarios.stream().map(UsuarioDTO::new).collect(Collectors.toList());
+    }
+
+    public List<UsuarioDTO> buscarAtendentesPorNome(String nome) {
+        List<Usuario> usuarios = usuarioRepository.findByNomeContainingIgnoreCaseAndTipoUsuario(nome, TipoUsuario.ATENDENTE);
+        return usuarios.stream().map(UsuarioDTO::new).collect(Collectors.toList());
+    }
 
     public UsuarioDTO salvarUsuario(UsuarioCreateDTO dto){
         Usuario entity = new Usuario();

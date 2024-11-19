@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
 import serviceHome from '../../Servicies/service';
-import authService from '../../Servicies/authService'; // Importar o authService para obter dados do usuário logado
+import authService from '../../Servicies/authService';
 import './Clientes.css';
 
 const Clientes = () => {
@@ -14,6 +14,7 @@ const Clientes = () => {
   const navigate = useNavigate();
   const [userName, setUserName] = useState('');
   const [userRole, setUserRole] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     fetchClientes(currentPage, clientesPerPage);
@@ -59,14 +60,35 @@ const Clientes = () => {
     navigate('/clientes/novo');
   };
 
+  const handleSearch = async () => {
+    if (searchQuery.trim() !== '') {
+      try {
+        const response = await serviceHome.buscarClientesPorNome(searchQuery);
+        setClientes(response);
+        setTotalPages(1); // Ao buscar, redefinir a paginação para 1 página apenas
+        setCurrentPage(0); // Resetar a página atual
+      } catch (error) {
+        console.error('Erro ao buscar clientes', error);
+      }
+    } else {
+      // Se a busca estiver vazia, buscar clientes normalmente
+      fetchClientes(currentPage, clientesPerPage);
+    }
+  };
+
   return (
     <div className="container-dashboard-clientes">
       <Sidebar />
       <main className="clientes-main">
         <div className="top-bar">
           <div className="search-bar">
-            <input type="text" placeholder="Pesquisar por cliente..." />
-            <button>Pesquisar</button>
+            <input
+              type="text"
+              placeholder="Pesquisar por cliente..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button onClick={handleSearch}>Pesquisar</button>
             <button className="create-btn" onClick={handleCreateCliente}>Criar Cliente</button>
           </div>
           <div className="top-actions">
