@@ -35,6 +35,11 @@ public class AnotacoesService {
         List<Anotacoes> anotacoes = anotacoesRepository.findAll();
         return anotacoes.stream().map(AnotacoesDTO::new).collect(Collectors.toList());
     }
+    @Transactional(readOnly = true)
+    public List<AnotacoesDTO> buscarAnotacoesPorTexto(String texto) {
+        List<Anotacoes> anotacoes = anotacoesRepository.buscarPorTexto(texto);
+        return anotacoes.stream().map(AnotacoesDTO::new).collect(Collectors.toList());
+    }
 
     public AnotacoesDTO salvarAnotacoes(AnotacoesDTO dto){
         Anotacoes entity = new Anotacoes();

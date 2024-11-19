@@ -12,6 +12,7 @@ const Anotacoes = () => {
   const [currentAnotacaoId, setCurrentAnotacaoId] = useState(null);
   const [error, setError] = useState('');
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   // Carregar anotações do backend ao montar o componente
   useEffect(() => {
@@ -43,6 +44,20 @@ const Anotacoes = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewAnotacao((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleSearch = async () => {
+    try {
+      const response = await serviceHome.buscarAnotacoesPorTexto(searchTerm);
+      setAnotacoes(response);
+    } catch (error) {
+      console.error('Erro ao buscar anotações', error);
+      setError('Erro ao buscar anotações.');
+    }
   };
 
   const handleAddAnotacao = async () => {
@@ -115,8 +130,13 @@ const Anotacoes = () => {
       <main className="anotacoes-main">
         <div className="top-bar">
           <div className="search-bar">
-            <input type="text" placeholder="Pesquisar por anotação..." />
-            <button>Pesquisar</button>
+            <input
+              type="text"
+              placeholder="Pesquisar por anotação..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <button onClick={handleSearch}>Pesquisar</button>
           </div>
           <div className="top-actions">
             <div className="profile">

@@ -233,6 +233,20 @@ async buscarChamadosPorTitulo(titulo) {
     }
   },
 
+  async buscarAnotacoesPorTexto(texto) {
+    try {
+      const response = await axios.get(`${baseURL}/anotacoes/buscar`, {
+        params: { texto },
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar anotações por texto", error);
+      throw error;
+    }
+  },
+  
+
   async salvarReuniao(reuniao) {
     try {
       const response = await axios.post(`${baseURL}/reuniao`, reuniao, {

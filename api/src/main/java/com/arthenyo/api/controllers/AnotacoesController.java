@@ -24,6 +24,12 @@ public class AnotacoesController {
         List<AnotacoesDTO> anotacoes = anotacoesService.buscarTodasAnotacoes();
         return ResponseEntity.ok().body(anotacoes);
     }
+    @GetMapping("/buscar")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
+    public ResponseEntity<List<AnotacoesDTO>> buscarAnotacoesPorTexto(@RequestParam("texto") String texto) {
+        List<AnotacoesDTO> anotacoes = anotacoesService.buscarAnotacoesPorTexto(texto);
+        return ResponseEntity.ok().body(anotacoes);
+    }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
