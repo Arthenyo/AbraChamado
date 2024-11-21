@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
 import ThemeToggler from '../../components/themeToggler/ThemeToggler';
 import serviceHome from '../../Servicies/service';
@@ -6,16 +7,18 @@ import authService from '../../Servicies/authService';
 import './AbrirChamado.css';
 
 const AbrirChamado = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [chamado, setChamado] = useState({
     titulo: '',
     descricao: '',
     statusChamado: 'ABERTO',
     prioridadeChamado: 'BAIXA',
     setor: '',
-    usuario: '',
-    atendente: ''
+    usuario: ''
   });
   const [setores, setSetores] = useState([]);
+  const [clientes, setClientes] = useState([]);
   const [usuarioLogado, setUsuarioLogado] = useState('');
   const [error, setError] = useState('');
 
@@ -28,15 +31,47 @@ const AbrirChamado = () => {
       try {
         const user = await authService.getLoggedUser();
         setUsuarioLogado(user.nome);
-        setChamado((prev) => ({ ...prev, usuario: user.nome, atendente: user.nome }));
       } catch (error) {
         console.error('Erro ao obter usuário logado', error);
         setError('Erro ao obter usuário logado. Tente novamente mais tarde.');
       }
     };
 
+    // Carregar lista de clientes
+    const fetchClientes = async () => {
+      try {
+        const response = await serviceHome.obterTodosClientes();
+        setClientes(response);
+      } catch (error) {
+        console.error('Erro ao obter lista de clientes', error);
+        setError('Erro ao obter lista de clientes. Tente novamente mais tarde.');
+      }
+    };
+
+    // Se estamos no modo de edição, carregar os detalhes do chamado
+    const fetchChamado = async () => {
+      if (id) {
+        try {
+          const chamadoExistente = await serviceHome.buscarChamadoPorId(id);
+          setChamado({
+            titulo: chamadoExistente.titulo,
+            descricao: chamadoExistente.descricao,
+            statusChamado: chamadoExistente.statusChamado,
+            prioridadeChamado: chamadoExistente.prioridadeChamado,
+            setor: chamadoExistente.setor,
+            usuario: chamadoExistente.usuario,
+          });
+        } catch (error) {
+          console.error('Erro ao buscar chamado para edição', error);
+          setError('Erro ao buscar chamado para edição. Tente novamente mais tarde.');
+        }
+      }
+    };
+
     fetchUsuarioLogado();
-  }, []);
+    fetchClientes();
+    fetchChamado();
+  }, [id]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -47,12 +82,19 @@ const AbrirChamado = () => {
     e.preventDefault();
     setError('');
     try {
-      await serviceHome.salvarChamado(chamado);
-      alert('Chamado aberto com sucesso!');
-      setChamado({ titulo: '', descricao: '', statusChamado: 'ABERTO', prioridadeChamado: 'BAIXA', setor: '', usuario: usuarioLogado, atendente: usuarioLogado });
+      if (id) {
+        // Editar chamado existente
+        await serviceHome.atualizarChamado(id, chamado);
+        alert('Chamado atualizado com sucesso!');
+      } else {
+        // Abrir um novo chamado
+        await serviceHome.salvarChamado(chamado);
+        alert('Chamado aberto com sucesso!');
+      }
+      navigate('/chamados');
     } catch (error) {
-      console.error('Erro ao abrir chamado', error);
-      setError('Erro ao abrir chamado. Tente novamente mais tarde.');
+      console.error('Erro ao salvar chamado', error);
+      setError('Erro ao salvar chamado. Tente novamente mais tarde.');
     }
   };
 
@@ -71,7 +113,7 @@ const AbrirChamado = () => {
             <ThemeToggler />
           </div>
         </div>
-        <h1>Abrir Chamado</h1>
+        <h1>{id ? 'Editar Chamado' : 'Abrir Chamado'}</h1>
         {error && <p className="error-message">{error}</p>}
         <form className="abrir-chamado-form" onSubmit={handleSubmit}>
           <label>
@@ -121,27 +163,37 @@ const AbrirChamado = () => {
             </select>
           </label>
           <label>
-            Usuário
-            <input
-              type="text"
+            Cliente
+            <select
               name="usuario"
               value={chamado.usuario}
               onChange={handleInputChange}
-              readOnly
-            />
+              required
+            >
+              <option value="">Selecione o Cliente</option>
+              {clientes.map((cliente) => (
+                <option key={cliente.id} value={cliente.nome}>{cliente.nome}</option>
+              ))}
+            </select>
           </label>
-          <label>
-            Atendente
-            <input
-              type="text"
-              name="atendente"
-              value={chamado.atendente}
-              onChange={handleInputChange}
-              readOnly
-            />
-          </label>
+          {/* Exibir campo de status apenas se estivermos no modo de edição */}
+          {id && (
+            <label>
+              Status do Chamado
+              <select
+                name="statusChamado"
+                value={chamado.statusChamado}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="ABERTO">Aberto</option>
+                <option value="EM_ANDAMENTO">Em Andamento</option>
+                <option value="FECHADO">Fechado</option>
+              </select>
+            </label>
+          )}
           <button type="submit" className="save-btn">
-            Abrir Chamado
+            {id ? 'Salvar Alterações' : 'Abrir Chamado'}
           </button>
         </form>
       </main>

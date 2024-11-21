@@ -3,6 +3,9 @@ package com.arthenyo.api.controllers;
 import com.arthenyo.api.entities.Auditoria;
 import com.arthenyo.api.repositories.AuditoriaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,5 +25,6 @@ public class AuditoriaController {
     public List<Auditoria> obterAuditoriasRecentes() {
         return auditoriaRepository.findTop3ByOrderByTimestampDesc();
     }
+
 }
 

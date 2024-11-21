@@ -1,16 +1,23 @@
 // Sidebar.js (React Component)
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Sidebar.css';
 import '../../util/Colors.css';
 import '../../GlobalStyles.css';
+import authService from '../../Servicies/authService';
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeLink, setActiveLink] = useState(location.pathname);
 
   const handleLinkClick = (path) => {
     setActiveLink(path);
+  };
+
+  const handleLogout = () => {
+    authService.logout(); // Chama o serviço de logout para remover o token
+    navigate('/login');   // Redireciona o usuário para a página de login
   };
 
   return (
@@ -33,7 +40,7 @@ const Sidebar = () => {
           <h3>Chamados</h3>
         </Link>
         <Link to="/abrir-chamado" className={activeLink === '/abrir-chamado' ? 'active' : ''} onClick={() => handleLinkClick('/abrir-chamado')}>
-          <span className="material-icons-sharp">add_circle_outline</span> {/* Ícone adicionado */}
+          <span className="material-icons-sharp">add_circle_outline</span>
           <h3>Abrir Chamado</h3>
         </Link>
         <Link to="/clientes" className={activeLink === '/clientes' ? 'active' : ''} onClick={() => handleLinkClick('/clientes')}>
@@ -56,10 +63,10 @@ const Sidebar = () => {
           <span className="material-icons-sharp">bar_chart</span>
           <h3>Relatórios</h3>
         </Link>
-        <Link to="/sair" className={activeLink === '/sair' ? 'active' : ''} onClick={() => handleLinkClick('/sair')}>
+        <button className="logout-btn" onClick={handleLogout}>
           <span className="material-icons-sharp">logout</span>
           <h3>Sair</h3>
-        </Link>
+        </button>
       </div>
     </aside>
   );

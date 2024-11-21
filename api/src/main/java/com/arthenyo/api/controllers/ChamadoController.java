@@ -1,11 +1,10 @@
 package com.arthenyo.api.controllers;
 
 import com.arthenyo.api.dtos.ChamadoDTO;
-import com.arthenyo.api.dtos.UsuarioDTO;
 import com.arthenyo.api.entities.Chamado;
 import com.arthenyo.api.entities.enums.StatusChamado;
 import com.arthenyo.api.services.ChamadoService;
-import com.arthenyo.api.services.UsuarioService;
+import com.arthenyo.api.services.exception.ObjectNotFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -75,8 +73,18 @@ public class ChamadoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
-    public ResponseEntity<ChamadoDTO>atualizarChamado(@PathVariable Long id ,@RequestBody ChamadoDTO dto){
-        dto = chamadoService.atualizarChamado(id,dto);
+    public ResponseEntity<ChamadoDTO> atualizarChamado(@PathVariable Long id, @RequestBody ChamadoDTO dto) {
+        try {
+            dto = chamadoService.atualizarChamado(id, dto);
+            return ResponseEntity.ok().body(dto);
+        } catch (ObjectNotFound e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+    @PutMapping("/{id}/assumir")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
+    public ResponseEntity<ChamadoDTO> assumirChamado(@PathVariable Long id, @RequestParam String atendenteNome) {
+        ChamadoDTO dto = chamadoService.assumirChamado(id, atendenteNome);
         return ResponseEntity.ok().body(dto);
     }
 

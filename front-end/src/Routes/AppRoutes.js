@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate  } from "react-router-dom";
 import Home from "../pages/home/Home";
 import Chamados from "../pages/chamados/Chamados";
 import Clientes from "../pages/clientes/Clientes";
@@ -16,11 +16,13 @@ export function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/chamados" element={<Chamados />} />
         <Route path="/chamados/:id" element={<DetalhesChamado />} />
         <Route path="/abrir-chamado" element={<AbrirChamado />} />
+        <Route path="/abrir-chamado/:id" element={<AbrirChamado />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/clientes/novo" element={<FormularioCliente />} />
         <Route path="/clientes/:id/editar" element={<FormularioCliente />} />

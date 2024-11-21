@@ -117,6 +117,35 @@ async buscarChamadosPorTitulo(titulo) {
       throw error;
     }
   },
+  async atualizarChamado(id, chamado) {
+    try {
+      const response = await axios.put(`${baseURL}/chamado/${id}`, chamado, {
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao atualizar chamado", error);
+      throw error;
+    }
+  },
+
+  async assumirChamado(chamadoId, atendenteNome) {
+    try {
+      const response = await axios.put(
+        `${baseURL}/chamado/${chamadoId}/assumir`,
+        null,
+        {
+          params: { atendenteNome },
+          headers: getHeaders(),
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao assumir chamado', error);
+      throw error;
+    }
+  },  
+  
 
   async obterUsuariosPorTipo(tipoUsuario, pagina, tamanho) {
     try {
@@ -133,6 +162,17 @@ async buscarChamadosPorTitulo(titulo) {
       throw error;
     }
   },
+  async obterTodosClientes() {
+    try {
+      const response = await axios.get(`${baseURL}/usuario/tipo/CLIENTE/todos`, {
+        headers: getHeaders(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Erro ao obter lista de clientes', error);
+      throw error;
+    }
+  },  
 
   async criarCliente(cliente) {
     try {

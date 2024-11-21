@@ -17,11 +17,10 @@ const Chamados = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    // Chama o serviço para obter o usuário logado
     const fetchLoggedUser = async () => {
       try {
         const user = await authService.getLoggedUser();
-        setUserName(user.nome || 'Usuário'); // Usar 'Usuário' como fallback caso o nome não exista
+        setUserName(user.nome || 'Usuário');
         setUserRole(user.tipoUsuario || 'Acesso não definido');
       } catch (error) {
         console.error('Erro ao obter o usuário logado', error);
@@ -31,7 +30,6 @@ const Chamados = () => {
     fetchLoggedUser();
   }, []);
 
-  // Função para buscar os chamados paginados
   useEffect(() => {
     fetchChamados(currentPage, chamadosPerPage);
   }, [currentPage]);
@@ -68,16 +66,30 @@ const Chamados = () => {
       try {
         const response = await serviceHome.buscarChamadosPorTitulo(searchQuery);
         setChamados(response);
-        setTotalPages(1); // Ao buscar, redefinir a paginação para 1 página apenas
-        setCurrentPage(0); // Resetar a página atual
+        setTotalPages(1);
+        setCurrentPage(0);
       } catch (error) {
         console.error('Erro ao buscar chamados', error);
       }
     } else {
-      // Se a busca estiver vazia, buscar chamados normalmente
       fetchChamados(currentPage, chamadosPerPage);
     }
   };
+
+  const handleAssumirChamado = async (chamadoId) => {
+    try {
+      const atendenteNome = userName; // O usuário atual assumirá o chamado
+      await serviceHome.assumirChamado(chamadoId, atendenteNome);
+      // Atualizar a lista de chamados
+      fetchChamados(currentPage, chamadosPerPage);
+    } catch (error) {
+      console.error('Erro ao assumir chamado', error);
+    }
+  };
+
+  const handleEditChamado = (chamadoId) => {
+    navigate(`/abrir-chamado/${chamadoId}`);
+  };  
 
   return (
     <div className="container-dashboard-chamados">
@@ -125,7 +137,14 @@ const Chamados = () => {
                 <td>{chamado.setor || 'N/A'}</td>
                 <td>{chamado.atendente || 'N/A'}</td>
                 <td className={`status-${chamado.statusChamado.replace(' ', '-').toLowerCase()}`}>{chamado.statusChamado}</td>
-                <td><button className="details-btn" onClick={() => handleViewDetails(chamado.id)}>Detalhes</button></td>
+                <td>
+                  <button className="details-btn" onClick={() => handleViewDetails(chamado.id)}>Detalhes</button>
+                  {/* Mostrar botão "Assumir" somente se não houver atendente */}
+                  {!chamado.atendente && (
+                    <button className="edit-btn" onClick={() => handleAssumirChamado(chamado.id)}>Assumir</button>
+                  )}
+                  <button className="edit-btn" onClick={() => handleEditChamado(chamado.id)}>Editar</button>
+                </td>
               </tr>
             ))}
           </tbody>

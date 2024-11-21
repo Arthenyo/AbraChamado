@@ -34,6 +34,12 @@ public class UsuarioController {
     public Page<UsuarioDTO> getUsuariosPorTipo(@PathVariable TipoUsuario tipoUsuario, Pageable pageable) {
         return usuarioService.buscarUsuariosPorTipo(tipoUsuario, pageable);
     }
+    @GetMapping("/tipo/{tipoUsuario}/todos")
+    @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
+    public List<UsuarioDTO> getTodosUsuariosPorTipo(@PathVariable TipoUsuario tipoUsuario) {
+        return usuarioService.buscarTodosUsuariosPorTipo(tipoUsuario);
+    }
+
     @GetMapping("/buscarPorNome")
     @PreAuthorize("hasAnyRole('ADMINISTRADOR', 'SUPORTE')")
     public ResponseEntity<List<UsuarioDTO>> buscarClientesPorNome(@RequestParam String nome) {

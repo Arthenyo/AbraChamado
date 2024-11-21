@@ -22,18 +22,20 @@ public class ChamadoDTO {
     private Instant terminoChamado;
     private String usuario;
     private String atendente;
+    private List<ChamadoHistoricoDTO> historicoChamado;
 
-    public ChamadoDTO(Long id, String titulo, String descricao, StatusChamado statusChamado, PrioridadeChamado prioridadeChamado, String setor, Instant criacaoChamado, Instant terminoChamado, String usuario, String atendente) {
+    public ChamadoDTO(Long id, String titulo, String descricao, StatusChamado statusChamado, PrioridadeChamado prioridadeChamado, String setor, Instant criacaoChamado, Instant terminoChamado, String usuario, String atendente, List<ChamadoHistoricoDTO> historicoChamado) {
         this.id = id;
         this.titulo = titulo;
         this.descricao = descricao;
-        this.statusChamado = StatusChamado.ABERTO;
+        this.statusChamado = statusChamado;
         this.prioridadeChamado = prioridadeChamado;
         this.setor = setor;
         this.criacaoChamado = criacaoChamado;
         this.terminoChamado = terminoChamado;
         this.usuario = usuario;
         this.atendente = atendente;
+        this.historicoChamado = historicoChamado;
     }
 
     public ChamadoDTO(Chamado entity) {
@@ -46,7 +48,10 @@ public class ChamadoDTO {
         criacaoChamado = entity.getCriacaoChamado();
         terminoChamado = entity.getTerminoChamado();
         usuario = entity.getUsuario().getNome();
-        atendente = entity.getAtendente().getNome();
+        atendente = (entity.getAtendente() != null) ? entity.getAtendente().getNome() : null;
+        historicoChamado = entity.getHistoricoChamado().stream()
+                .map(ChamadoHistoricoDTO::new)
+                .collect(Collectors.toList());
     }
 
     public Long getId() {
@@ -87,5 +92,9 @@ public class ChamadoDTO {
 
     public String getAtendente() {
         return atendente;
+    }
+
+    public List<ChamadoHistoricoDTO> getHistoricoChamado() {
+        return historicoChamado;
     }
 }

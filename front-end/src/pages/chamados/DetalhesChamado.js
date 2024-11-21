@@ -1,4 +1,3 @@
-// DetalhesChamado.js (React Component)
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/sidebar/Sidebar';
@@ -27,17 +26,21 @@ const DetalhesChamado = () => {
           <p><b>Setor:</b> {chamado.setor || 'N/A'}</p>
           <p><b>Atendente:</b> {chamado.atendente ? chamado.atendente : 'Não atribuído'}</p>
           <p><b>Status:</b> {chamado.statusChamado}</p>
-          <p><b>Descrição:</b> {chamado.descricao}</p>
+          <p><b>Descrição Inicial:</b> {chamado.descricao}</p>
         </div>
         <div className="chamado-historico">
           <h2>Histórico de Atualizações</h2>
           <ul>
-            {chamado.history && chamado.history.length > 0 ? (
-              chamado.history.map((item, index) => (
+            {chamado.historicoChamado && chamado.historicoChamado.length > 0 ? (
+              chamado.historicoChamado.map((item, index) => (
                 <li key={index} className="historico-item">
-                  <p><b>Data:</b> {item.date}</p>
-                  <p><b>Ação:</b> {item.action}</p>
-                  <p><b>Descrição:</b> {item.description}</p>
+                  <p><b>Data:</b> {new Date(item.dataAlteracao).toLocaleString()}</p>
+                  <p><b>Descrição da Alteração:</b> {item.descricaoAlteracao}</p>
+                  <p><b>Alterado por:</b> {item.alteradoPor}</p>
+                  <p><b>Status Anterior:</b> {item.statusChamadoAnterior || 'N/A'}</p>
+                  <p><b>Status Novo:</b> {item.statusChamadoNovo || 'N/A'}</p>
+                  <p><b>Prioridade Anterior:</b> {item.prioridadeAnterior || 'N/A'}</p>
+                  <p><b>Prioridade Nova:</b> {item.prioridadeNova || 'N/A'}</p>
                 </li>
               ))
             ) : (

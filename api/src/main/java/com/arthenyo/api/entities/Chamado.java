@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -37,4 +38,7 @@ public class Chamado {
     @ManyToOne
     @JoinColumn(name = "atendente_id")
     private Usuario atendente;
+    @ElementCollection
+    @CollectionTable(name = "tb_chamado_historico", joinColumns = @JoinColumn(name = "chamado_id"))
+    private List<ChamadoHistorico> historicoChamado = new ArrayList<>();
 }
